@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Agency</title>
+    <!--Links-->
+    <link rel="stylesheet" href="Assets/styles.css">
+    <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+    rel="stylesheet" 
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+    crossorigin="anonymous">
+</head>
+<body>
+    
+    <!-- Sección 1: Navbar-->
+
+    <section>
+        <header>
+            <nav class="navbar navbar-expand-lg bg-body-tertiary rounded fixed-top" aria-label="Thirteenth navbar example">
+
+    <div class="container-fluid">
+
+    <!--Logo móvil-->
+    <div class="mobile-logo-center d-block d-lg-none">
+        <img src="Assets/Imgs/Logo.png" alt="Audi-logo" height="35px" width="100px">
+    </div>
+
+    <!-- Botón hamburguesa (solo visible en pantallas pequeñas) -->
+    <button class="navbar-toggler" 
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#navbarsExample11" 
+            aria-controls="navbarsExample11" 
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Contenedor colapsable del menú -->
+    <div class="collapse navbar-collapse d-lg-flex" id="navbarsExample11">
+
+      <!-- Sección izquierda: LOGO o marca -->
+      <a class="navbar-brand col-lg-3 me-0 d-none d-lg-block" href="#">
+        <img src="Assets/Imgs/Logo.png" alt="Audi-logo" height="35px" width="100px">
+      </a>
+
+      <!-- Sección central: Menú de navegación -->
+      <ul class="navbar-nav col-lg-6 justify-content-lg-center">
+        <!-- Opción activa -->
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">
+            Home
+          </a>
+        </li>
+
+        <!-- Opción normal -->
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            Link
+          </a>
+        </li>
+
+        <!-- Opción deshabilitada -->
+        <li class="nav-item">
+          <a class="nav-link disabled" aria-disabled="true">
+            Disabled
+          </a>
+        </li>
+
+        <!-- Dropdown (menú desplegable) -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" 
+             href="#" 
+             data-bs-toggle="dropdown" 
+             aria-expanded="false">
+            Dropdown
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Action</a></li>
+            <li><a class="dropdown-item" href="#">Another action</a></li>
+            <li><a class="dropdown-item" href="#">Something else here</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <!-- Sección derecha: Botón de acción -->
+      <div class="d-lg-flex col-lg-3 justify-content-lg-end">
+        <button class="btn-custom">Log In</button>
+      </div>
+    </div>
+
+  </di>
+</nav>
+
+        </header>
+    </section>
+
+    <!--Sección 2: Home-->
+
+    <section class="Home" id="Home">
+        <div class="px-4 py-5 my-5 text-center">
+  <h1 class="display-5 fw-bold text-body-emphasis">Centered hero</h1>
+  <div class="col-lg-6 mx-auto">
+    <p class="lead mb-4">
+        Explora nuestro catálogo con los modelos más recientes, recibe cotizaciones personalizadas y encuentra el auto perfecto para ti. Promociones exclusivas y atención especializada.
+    </p>
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <button type="button" class="btn btn-primary btn-lg px-4 gap-3">
+        Primary button
+      </button>
+      <button type="button" class="btn btn-outline-secondary btn-lg px-4">
+        Secondary
+      </button>
+    </div>
+  </div>
+</div>
+    </section>
+
+    <div class="col"> <div class="card shadow-sm"> <svg aria-label="Placeholder: Thumbnail" class="bd-placeholder-img card-img-top" height="225" preserveAspectRatio="xMidYMid slice" role="img" width="100%" xmlns="http://www.w3.org/2000/svg"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg> <div class="card-body"> <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p> <div class="d-flex justify-content-between align-items-center"> <div class="btn-group"> <button type="button" class="btn btn-sm btn-outline-secondary">View</button> <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> </div> <small class="text-body-secondary">9 mins</small> </div> </div> </div> </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
