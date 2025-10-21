@@ -41,7 +41,7 @@
 /* Efecto en items del menú */
 .nav-item {
     transition: all 0.3s ease;
-    margin: 0 20px;  /* Espacio para que no se pegue */
+    margin: 0 25px;  /* Espacio para que no se pegue */
 }
 
 .nav-item:hover {
@@ -98,7 +98,7 @@
 
 #Home {
     background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-                url('/Car Agency/Assets/Imgs/Audi.jpg') center/cover;
+                url('/Car-Agency/Assets/Imgs/Audi.jpg') center/cover !important;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
