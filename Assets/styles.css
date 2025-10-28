@@ -16,10 +16,15 @@
 }
 
 @media (max-width: 991px) {
+    .navbar-nav{
+        padding-top: 12px;
+    }
+
   .navbar {
     padding-top: 60px;
     min-height: 80px;
     position: sticky;
+    background-color: #dc3545 !important;
   }
   
   .mobile-logo-center {
@@ -28,6 +33,7 @@
     top: 15px;
     transform: translateX(-50%);
     z-index: 1050;
+    padding-top: 7px;
   }
   
   .navbar-toggler {
@@ -35,6 +41,8 @@
     position: relative;
     z-index: 1060;
   }
+
+
 }
 
 /* Efecto en items del menú */
@@ -85,6 +93,11 @@
     transition: all 0.3s ease;
 }
 
+.boton-is{
+    padding-top: 10px;
+    padding-left: 21px;
+}
+
 .btn-custom:hover {
   border: 2px solid #9f8e8e;
     background:#ffffff;
@@ -97,7 +110,7 @@
 
 #Home {
     background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-                url('https://images.unsplash.com/photo-1589536672709-a5d34b12466d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=928') center/cover !important;
+                url('./Imgs/Audi.jpg') center/cover !important;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -166,3 +179,116 @@
         height: 80vh;
     }
 }
+
+/* ====== CONTENEDOR FLEX ====== */
+.section-title {
+    padding-top: 60px;
+    padding-left: 30px;
+    padding-bottom: 10px;
+    font-family: "Montserrat", sans-serif !important;
+    font-optical-sizing: auto;
+    font-weight: 500 !important;
+    font-style: normal;
+}
+
+
+#Categories {
+  padding-top: 30px;
+  padding-bottom: 30px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 100 !important;
+  font-style: normal;
+}
+
+/* ====== CONTENEDOR DE TARJETAS ====== */
+.card-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+
+  /* ====== TARJETA ====== */
+  .card {
+    position: relative;
+    width: 450px;
+    height: 350px !important;
+    border-radius: 18px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    border: none;
+  }
+
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.40);
+  }
+
+  /* Oscurecer ligeramente la imagen */
+  .card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.45  ), rgba(0, 0, 0, 0.1));
+  }
+
+  /* ====== CONTENIDO DE TEXTO ====== */
+  .card h2 {
+    position: relative;
+    z-index: 2;
+    color: #ffffff;
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin: 20px;
+  }
+
+  /* ====== BOTÓN DE FLECHA ====== */
+  .arrow-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    color: black;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 22px;
+    transition: all 0.3s ease;
+    z-index: 2;
+    font-family: "M PLUS Rounded 1c", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .arrow-btn:hover {
+    background: #dc3545;
+    color: white;
+  }
+
+  /* ====== RESPONSIVO ====== */
+  @media (max-width: 768px) {
+    .card {
+      width: 90%;
+      height: 280px;
+    }
+  }
