@@ -292,3 +292,26 @@
       height: 280px;
     }
   }
+
+/* Recomendaciones */
+
+.carousel-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 20px;
+    scrollbar-width: none;
+  }
+
+  .carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Nueva clase para las mini cards */
+

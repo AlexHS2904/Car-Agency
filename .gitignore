@@ -1,0 +1,50 @@
+# ────────────────
+# Node.js
+# ────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.env
+
+# ────────────────
+# Logs y caché
+# ────────────────
+logs/
+*.log
+*.tmp
+*.out
+*.pid
+*.seed
+coverage/
+.cache/
+
+# ────────────────
+# Sistema operativo
+# ────────────────
+.DS_Store
+Thumbs.db
+
+# ────────────────
+# Archivos de entorno y configuración local
+# ────────────────
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ────────────────
+# IDEs y editores
+# ────────────────
+.vscode/
+.idea/
+*.swp
+
+# ────────────────
+# Archivos temporales o de compilación
+# ────────────────
+dist/
+build/
+temp/
+tmp/
