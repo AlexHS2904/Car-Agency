@@ -10,6 +10,7 @@
     "bootstrap": "^5.3.8",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
-    "express-session": "^1.18.2"
+    "express-session": "^1.18.2",
+    "mysql2": "^3.15.3"
   }
 }

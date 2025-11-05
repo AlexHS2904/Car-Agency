@@ -56,11 +56,38 @@
         </li>
 
          <!-- Opción activa -->
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">
-            Reservar
-          </a>
-        </li>
+        <li class="nav-item dropdown">
+  <a
+    class="nav-link dropdown-toggle active"
+    href="#"
+    id="reservasDropdown"
+    role="button"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+  >
+    Reservas
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="reservasDropdown">
+    <li>
+      <a
+        class="dropdown-item"
+        href="<%= currentUser ? '/mis-rentas' : '/login' %>"
+      >
+        Mis reservas
+      </a>
+    </li>
+    <li>
+      <a
+        class="dropdown-item"
+        href="<%= currentUser ? '/reservas/nueva' : '/login' %>"
+      >
+        Crear reserva
+      </a>
+    </li>
+  </ul>
+</li>
+
+
 
         
       </ul>

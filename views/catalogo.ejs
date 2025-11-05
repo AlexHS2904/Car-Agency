@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Catálogo de autos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- tu css global -->
+    <link rel="stylesheet" href="/Assets/styles.css" />
+    <!-- bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      body.catalog-page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #f8f9fa;
+      }
+
+      h2{
+            font-family: "Montserrat", sans-serif !important;
+            font-optical-sizing: auto;
+            font-weight: 400 !important;
+            font-style: normal;
+      }
+
+      .catalog-wrapper {
+        flex: 1 0 auto;
+        padding-top: 90px;
+        padding-bottom: 40px;
+      }
+
+      .car-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease;
+      }
+
+      .car-card:hover {
+        transform: translateY(-3px);
+      }
+
+      /* solo la imagen principal */
+      .car-card > img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+
+      /* iconito de persona */
+      .car-card img.icon {
+        width: 16px;
+        height: 16px;
+        object-fit: contain;
+      }
+
+      footer {
+        margin-top: auto;
+      }
+
+      @media (max-width: 576px) {
+        .catalog-wrapper {
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body class="catalog-page">
+    <!-- header -->
+    <%- include("partials/header.ejs") %>
+
+    <main class="catalog-wrapper">
+      <div class="container">
+        <h2 class="mb-4">Catálogo de autos</h2>
+
+        <!-- Filtros -->
+        <form method="GET" action="/catalogo" class="row g-3 mb-4">
+          <div class="col-md-3">
+            <label for="year" class="form-label">Año</label>
+            <input
+              type="number"
+              class="form-control"
+              id="year"
+              name="year"
+              placeholder="2024"
+              value="<%= filters.year || '' %>"
+            />
+          </div>
+
+          <div class="col-md-3">
+            <label for="tipo" class="form-label">Tipo</label>
+            <select id="tipo" name="tipo" class="form-select">
+              <option value="">Todos</option>
+              <option value="sedan" <%= filters.tipo === 'sedan' ? 'selected' : '' %>>Sedán</option>
+              <option value="hatchback" <%= filters.tipo === 'hatchback' ? 'selected' : '' %>>Hatchback</option>
+              <option value="suv" <%= filters.tipo === 'suv' ? 'selected' : '' %>>SUV / Camioneta</option>
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <label for="max_price" class="form-label">Precio (por día)</label>
+            <input
+              type="number"
+              class="form-control"
+              id="max_price"
+              name="max_price"
+              placeholder="1500"
+              value="<%= filters.max_price || '' %>"
+            />
+          </div>
+
+          <div class="col-md-3 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-outline-dark w-100">
+              Filtrar
+            </button>
+            <a href="/catalogo" class="btn btn-secondary">Limpiar</a>
+          </div>
+        </form>
+
+        <!-- Cards -->
+        <div class="row g-4">
+          <% if (cars.length === 0) { %>
+            <div class="col-12">
+              <div class="alert alert-info">
+                No hay autos que coincidan con los filtros.
+              </div>
+            </div>
+          <% } %>
+
+          <% cars.forEach(car => { %>
+            <div class="col-sm-6 col-md-4 col-lg-3">
+              <div class="car-card">
+                <img
+                  src="<%= car.image_url && car.image_url !== '' ? car.image_url : '/Assets/Imgs/placeholder-car.jpg' %>"
+                  alt="<%= car.brand %> <%= car.model %>"
+                >
+                <div class="p-3">
+                  <!-- nombre -->
+                  <h5 class="mb-1"><%= car.brand %> <%= car.model %></h5>
+
+                  <!-- tipo -->
+                  <% if (car.body_type) { %>
+                    <p class="mb-2">
+                      <span class="badge bg-light text-dark">
+                        <%= car.body_type.toUpperCase() %>
+                      </span>
+                    </p>
+                  <% } %>
+
+                  <!-- detalles: pasajeros y año -->
+                  <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
+                    <span class="d-flex align-items-center gap-1">
+                      <img class="icon" src="/Assets/Imgs/person.svg" alt="person">
+                      <%= car.seats || 5 %> pax
+                    </span>
+                    <span><%= car.year %></span>
+                  </div>
+
+                  <!-- precio -->
+                  <p class="fw-semibold mb-3" style="font-size: 1.05rem;">
+                    $<%= Number(car.price_per_day).toLocaleString('es-MX') %> MXN/día
+                  </p>
+
+                  <a
+                    href="/reservas/nueva?car_id=<%= car.id %>"
+                    class="btn btn-sm btn-outline-dark w-100"
+                  >
+                    Rentar
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </main>
+
+    <!-- footer -->
+    <%- include("partials/footer.ejs") %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
