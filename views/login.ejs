@@ -19,49 +19,75 @@
         rel="stylesheet"
         />
         <style>
-        html, body {
-            height: 100%;
-        }
-        .form-signin {
-            max-width: 330px;
-            padding: 1.5rem;
-        }
-        .form-signin .form-floating:focus-within {
-            z-index: 2;
-        }
-        .form-signin input[type="email"],
-        .form-signin input[type="text"] {
-            margin-bottom: -1px;
-            border-bottom-right-radius: 0;
-            border-bottom-left-radius: 0;
-        }
-        .form-signin input[type="password"] {
-            margin-bottom: 1rem;
-            border-top-left-radius: 0;
-            border-top-right-radius: 0;
-        }
+    html, body {
+        height: 100%;
+    }
 
-        #logo_login{
-            text-align: center;
-            padding-bottom: 10px;
-            padding-right: 5px;
-        }
+    body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #e9ecef;
+    }
 
-        h1{
-            font-family: "Montserrat", sans-serif !important;
-            font-optical-sizing: auto;
-            font-weight: 900 !important;
-            font-style: normal;
-        }
+    .login-main {
+        margin-top: 100px;
+        margin-bottom: 40px;
+        display: flex;
+        justify-content: center;
+    }
 
-        label{
-            font-family: "Montserrat", sans-serif !important;
-            font-optical-sizing: auto;
-            font-weight: 500 !important;
-            font-style: normal;
-        }
+    .form-signin {
+        width: 100%;
+        max-width: 330px;
+        padding: 1.5rem;
+    }
 
-        </style>
+    .form-signin .form-floating:focus-within {
+        z-index: 2;
+    }
+
+    .form-signin input[type="text"],
+    .form-signin input[type="email"] {
+        margin-bottom: -1px;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .form-signin input[type="password"] {
+        margin-bottom: 1rem;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+
+    #logo_login {
+        text-align: center;
+        padding-bottom: 10px;
+    }
+
+    h1 {
+        font-family: "Montserrat", sans-serif !important;
+        font-weight: 900 !important;
+    }
+
+    label {
+        font-family: "Montserrat", sans-serif !important;
+        font-weight: 500 !important;
+    }
+
+    footer {
+        margin-top: auto;
+    }
+
+    /* móvil */
+    @media (max-width: 576px) {
+        .login-main {
+        margin-top: 90px;
+        padding: 0 20px;
+        }
+    }
+</style>
+
   </head>
 
   <body class="d-flex  flex-column py-4 bg-body-tertiary">
@@ -72,7 +98,7 @@
       <form action="/login" method="POST">
 
         <div id="logo_login">
-            <img src="/Assets/Imgs/logo.png" alt="Logo" height="50px" width="130px">
+            <img src="/Assets/Imgs/Logo.png" alt="Logo" height="50px" width="130px">
         </div>
 
         <h1 class="h3 mb-3 fw-normal text-center align-items-center">Inicia sesión</h1>
@@ -118,6 +144,11 @@
 
         <button class="btn btn-outline-dark w-100 py-2" type="submit">
           Entrar
+        </button>
+        <br>
+        <br>
+        <button class="btn btn-outline-dark w-100 py-2" type="submit">
+          Crear cuenta
         </button>
         <p class="mt-5 mb-3 text-body-secondary text-center">© Agencia de Autos</p>
       </form>
