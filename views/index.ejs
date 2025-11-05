@@ -23,6 +23,13 @@
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&family=M+PLUS+Rounded+1c&display=swap"
     rel="stylesheet"
   />
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+/>
 </head>
 
 <body>
@@ -49,7 +56,7 @@
   </section>
 
   <!-- Sección Categorías -->
-  <h1 class="section-title">Categorías</h1>
+  <h1 class="section-title" id="cat">Categorías</h1>
 
   <section id="Categories">
     <div class="card-container">
@@ -80,7 +87,96 @@
   </section>
 
   <!-- Sección Recomendaciones -->
+
   <h1 class="section-title">Recomendaciones</h1>
+
+  <section class="mini-carousel-section">
+
+  <div class="mini-carousel-container">
+    <button class="mini-carousel-btn mini-carousel-btn-left" id="miniCarouselPrev">‹</button>
+
+    <div class="mini-carousel-wrapper" id="miniCarouselWrapper">
+      <div class="mini-carousel-track" id="miniCarouselTrack">
+
+        <div class="mini-carousel-card">
+          <img src="/Assets/Imgs/a1.png" alt="Card 1">
+          <p>Audi A1 Sportback</p>
+          <div class="price-row">
+            <span class="price"><img class="icon" src="/Assets/Imgs/person.svg" alt="person svg">5</span>
+            <span class="year">$120,000</span>
+            <span class="year">2020</span>
+          </div>
+        </div>
+        <div class="mini-carousel-card">
+          <img src="/Assets/Imgs/q5_nologo.png" alt="Card 1">
+          <p>Audi A1 Sportback</p>
+          <div class="price-row">
+            <span class="price"><img class="icon" src="/Assets/Imgs/person.svg" alt="person svg">5</span>
+            <span class="year">$120,000</span>
+            <span class="year">2020</span>
+          </div>
+        </div>
+        <div class="mini-carousel-card">
+          <img src="/Assets/Imgs/a1.png" alt="Card 1">
+          <p>Audi A1 Sportback</p>
+          <div class="price-row">
+            <span class="price"><img class="icon" src="/Assets/Imgs/person.svg" alt="person svg">5</span>
+            <span class="year">$120,000</span>
+            <span class="year">2020</span>
+          </div>
+        </div>
+        <div class="mini-carousel-card">
+          <img src="/Assets/Imgs/a1.png" alt="Card 1">
+          <p>Audi A1 Sportback</p>
+          <div class="price-row">
+            <span class="price"><img class="icon" src="/Assets/Imgs/person.svg" alt="person svg">5</span>
+            <span class="year">$120,000</span>
+            <span class="year">2020</span>
+          </div>
+        </div>
+        <div class="mini-carousel-card">
+          <img src="/Assets/Imgs/a1.png" alt="Card 1">
+          <p>Audi A1 Sportback</p>
+          <div class="price-row">
+            <span class="price"><img class="icon" src="/Assets/Imgs/person.svg" alt="person svg">5</span>
+            <span class="year">$120,000</span>
+            <span class="year">2020</span>
+          </div>
+        </div>
+        <div class="mini-carousel-card">
+          <img src="/Assets/Imgs/a1.png" alt="Card 1">
+          <p>Audi A1 Sportback</p>
+          <div class="price-row">
+            <span class="price"><img class="icon" src="/Assets/Imgs/person.svg" alt="person svg">5</span>
+            <span class="year">$120,000</span>
+            <span class="year">2020</span>
+          </div>
+        </div>
+        <div class="mini-carousel-card">
+          <img src="/Assets/Imgs/a1.png" alt="Card 1">
+          <p>Audi A1 Sportback</p>
+          <div class="price-row">
+            <span class="price"><img class="icon" src="/Assets/Imgs/person.svg" alt="person svg">5</span>
+            <span class="year">$120,000</span>
+            <span class="year">2020</span>
+          </div>
+        </div>
+        <!-- Agregar más aquí -->
+      </div>
+    </div>
+
+    <button class="mini-carousel-btn mini-carousel-btn-right" id="miniCarouselNext">›</button>
+  </div>
+
+  <a href="/catalog" class="cat-btn"><p > Catálogo completo→</p></a>
+</section>
+
+
+  <%- include("partials/footer.ejs") %>
+
+
+  <script src="/Assets/scripts.js"></script>
+
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

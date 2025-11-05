@@ -48,7 +48,7 @@
 /* Efecto en items del menú */
 .nav-item {
     transition: all 0.3s ease;
-    margin: 0 25px;  /* Espacio para que no se pegue */
+    margin: 0 25px;
 }
 
 .nav-item:hover {
@@ -63,7 +63,7 @@
 }
 
 .nav-link:hover {
-    color: #dc3545 !important;  /* Color rojo al hover */
+    color: #dc3545 !important;
 }
 
 .nav-link:hover::after {
@@ -71,7 +71,7 @@
     position: absolute;
     width: 100%;
     height: 2px;
-    background-color: #dc3545;  /* Línea roja */
+    background-color: #dc3545;
     bottom: -5px;
     left: 0;
     animation: underline 0.3s ease;
@@ -109,7 +109,7 @@
 /* Home */
 
 #Home {
-    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+    background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), 
                 url('./Imgs/Audi.jpg') center/cover !important;
     background-size: cover;
     background-position: center;
@@ -180,7 +180,7 @@
     }
 }
 
-/* ====== CONTENEDOR FLEX ====== */
+/* CONTENEDOR FLEX */
 .section-title {
     padding-top: 60px;
     padding-left: 30px;
@@ -206,7 +206,7 @@
   font-style: normal;
 }
 
-/* ====== CONTENEDOR DE TARJETAS ====== */
+/* CONTENEDOR DE TARJETAS */
 .card-container {
   display: flex;
   align-items: center;
@@ -218,7 +218,7 @@
 }
 
 
-  /* ====== TARJETA ====== */
+  /* TARJETA */
   .card {
     position: relative;
     width: 450px;
@@ -248,7 +248,7 @@
     background: linear-gradient(to top, rgba(0, 0, 0, 0.45  ), rgba(0, 0, 0, 0.1));
   }
 
-  /* ====== CONTENIDO DE TEXTO ====== */
+  /* CONTENIDO DE TEXTO */
   .card h2 {
     position: relative;
     z-index: 2;
@@ -258,7 +258,7 @@
     margin: 20px;
   }
 
-  /* ====== BOTÓN DE FLECHA ====== */
+  /* BOTÓN DE FLECHA */
   .arrow-btn {
     position: absolute;
     bottom: 20px;
@@ -285,7 +285,6 @@
     color: white;
   }
 
-  /* ====== RESPONSIVO ====== */
   @media (max-width: 768px) {
     .card {
       width: 90%;
@@ -313,5 +312,255 @@
     display: none;
   }
 
-  /* Nueva clase para las mini cards */
+/* Estilos para las recomendaciones*/
 
+.mini-carousel-section {
+  width: 100%;
+  padding: 20px;
+  background-color: white;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.mini-carousel-title {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+.mini-carousel-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-carousel-wrapper {
+  overflow: hidden;
+  width: 90%;
+}
+
+.mini-carousel-track {
+  display: flex;
+  transition: transform 0.4s ease;
+}
+
+.mini-carousel-card {
+  background-color:#ececec;
+  flex: 0 0 auto;
+  width: 220px;
+  height: 200px;
+  border-radius: 10px;
+  margin: 0 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  text-align: center;
+  overflow: hidden;
+}
+
+.mini-carousel-card img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+}
+
+.mini-carousel-card p {
+  margin: 8px 0;
+  font-weight: 500;
+  color: #333;
+}
+
+.mini-carousel-card span{
+  font-weight: 500;
+  color: #636363;
+}
+
+.mini-carousel-btn {
+  border: black solid 1px;
+  background-color: white;
+  color: black;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 30px;
+  transition: 0.3s;
+  z-index: 10;
+}
+
+.mini-carousel-btn:hover {
+  color: white;
+  background-color: black;
+}
+
+.mini-carousel-btn-left {
+  position: absolute;
+  left: 10px;
+}
+
+.mini-carousel-btn-right {
+  position: absolute;
+  right: 10px;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.price .icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  padding-bottom: 5px;
+}
+
+
+@media (max-width: 768px) {
+
+  .mini-carousel-btn {
+  border: black solid 1px;
+  background-color: white;
+  color: black;
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 30px;
+  transition: 0.3s;
+  z-index: 10;
+  padding: auto;
+}
+
+.mini-carousel-btn:hover {
+  color: white;
+  background-color: black;
+}
+
+.mini-carousel-btn-left {
+  position: absolute;
+  left: 10px;
+}
+
+.mini-carousel-btn-right {
+  position: absolute;
+  right: 10px;
+}
+
+}
+
+/* Botón catálogo completo */
+
+.cat-btn {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: white;
+  padding: 8px 15px;
+  border-radius: 30px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  color: #222;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.cat-btn:hover {
+  color: #dc3545;
+}
+
+
+@keyframes underline {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+
+/* FOOTER */
+
+.footer {
+  background-color: #000000; 
+  color: #e2e8f0;
+  padding: 40px 20px 20px;
+  font-family: "Montserrat", sans-serif;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 1.5fr 1fr;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.footer-logo img {
+  width: 80px;
+  margin-bottom: 10px;
+}
+
+.footer-logo h3 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.footer-description p {
+  margin-bottom: 10px;
+  line-height: 1.4;
+  font-size: 0.9rem;
+}
+
+.footer-contact p {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.footer a {
+  color: #e2e8f0;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: #f97316;
+}
+
+.invertido{
+  filter: invert(1);
+}
+
+.footer-bottom {
+  margin-top: 30px;
+  border-top: 1px solid rgba(226, 232, 240, 0.15);
+  padding-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 900px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
+
+.login-main {
+  margin: 110px auto 40px;
+}
+
+footer {
+  margin-top: auto;
+}
