@@ -200,3 +200,27 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server on " + PORT);
 });
+
+
+// DEBUG: ver qué ve Render
+app.get("/debug-cars", async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM cars");
+    res.send({
+      env: {
+        DB_HOST: process.env.DB_HOST,
+        DB_PORT: process.env.DB_PORT,
+        DB_NAME: process.env.DB_NAME,
+        DB_USER: process.env.DB_USER,
+      },
+      total: rows.length,
+      sample: rows.slice(0, 5),
+    });
+  } catch (err) {
+    console.error("DEBUG ERROR /debug-cars:", err);
+    res.status(500).send({
+      error: err.message,
+      code: err.code,
+    });
+  }
+});
