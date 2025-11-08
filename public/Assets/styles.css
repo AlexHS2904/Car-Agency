@@ -6,7 +6,6 @@
     box-sizing: border-box;
 }
 
-/* Estilo logo cuando es pantalla pequeña */
 
 .navbar.sticky-top {
     position: -webkit-sticky !important;
@@ -16,36 +15,34 @@
 }
 
 @media (max-width: 991px) {
-    .navbar-nav{
-        padding-top: 12px;
-    }
-
   .navbar {
-    padding-top: 60px;
-    min-height: 80px;
+    background-color: #f8f9fa !important;
+    min-height: 60px;
+    padding-top: 0;
     position: sticky;
-    background-color: #dc3545 !important;
+    top: 0;
+    z-index: 1020;
   }
-  
+
   .mobile-logo-center {
     position: absolute;
     left: 50%;
-    top: 15px;
+    top: 12px;
     transform: translateX(-50%);
     z-index: 1050;
-    padding-top: 7px;
   }
-  
+
   .navbar-toggler {
     margin-left: auto;
     position: relative;
     z-index: 1060;
   }
 
-
+  .navbar-collapse.show {
+    padding-top: 50px;
+  }
 }
 
-/* Efecto en items del menú */
 .nav-item {
     transition: all 0.3s ease;
     margin: 0 25px;
@@ -94,7 +91,6 @@
   left: 0;
   animation: underline 0.3s ease;
 }
-
 
 @keyframes underline {
     from { width: 0; }
@@ -161,11 +157,18 @@
     font-style: normal;
 }
 
+#Home a{
+font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 480 !important;
+  font-style: normal;
+}
+
 /* Para móviles */
 @media (max-width: 768px) {
     .hero-section {
         height: 70vh;
-        background-attachment: scroll; /* Mejor rendimiento en móviles */
+        background-attachment: scroll;
         text-align: center;
     }
     
@@ -199,7 +202,6 @@
     }
 }
 
-/* CONTENEDOR FLEX */
 .section-title {
     padding-top: 60px;
     padding-left: 30px;
@@ -259,7 +261,6 @@
     box-shadow: 0 12px 25px rgba(0, 0, 0, 0.40);
   }
 
-  /* Oscurecer ligeramente la imagen */
   .card::after {
     content: "";
     position: absolute;
@@ -357,8 +358,13 @@
 }
 
 .mini-carousel-wrapper {
-  overflow: hidden;
+  overflow-x: auto;
   width: 90%;
+  scroll-behavior: smooth;
+}
+
+.mini-carousel-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
 .mini-carousel-track {
@@ -582,4 +588,182 @@
 
 footer {
   margin-top: auto;
+}
+
+/* Admin EJS */
+
+/* layout general */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #edf0f4;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Sidebar */
+
+.sidebar {
+  width: 240px;
+  background: #0f172a;
+  color: #fff;
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.sidebar__icon {
+  font-size: 1.4rem;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.sidebar__link {
+  color: #cbd5f5;
+  text-decoration: none;
+  padding: .5rem .75rem;
+  border-radius: .5rem;
+  transition: background .15s ease, color .15s ease;
+  font-weight: 500;
+}
+
+.sidebar__link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.sidebar__link--active {
+  background: #e11d48;
+  color: #fff;
+}
+
+/* main */
+
+.main {
+  flex: 1;
+  padding: 1.5rem 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* header superior */
+.main__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.main__title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* botón */
+.btn {
+  display: inline-block;
+  border: none;
+  text-decoration: none;
+  border-radius: .6rem;
+  padding: .5rem 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: #e11d48;
+  color: #fff;
+}
+
+/* cards */
+.cards_admin {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.card_admin {
+  background: #fff;
+  border-radius: .75rem;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  min-height: 110px;
+}
+
+.card__number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.card__label {
+  margin: 0;
+  color: #475569;
+  font-size: .9rem;
+}
+
+@media (max-width: 992px) {
+  .cards_admin {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cards_admin {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* panel movimientos */
+.panel {
+  background: #fff;
+  border-radius: .75rem;
+  padding: 1.2rem 1rem 1.5rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.03);
+}
+
+.panel__header h2 {
+  margin: 0 0 .6rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.empty {
+  color: #94a3b8;
+  font-size: .9rem;
+}
+
+.sidebar__link--secondary {
+  margin-top: .75rem;
+  background: rgba(255,255,255,0.03);
+  font-weight: 500;
 }
