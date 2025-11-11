@@ -13,13 +13,7 @@ function ensureLogged(req, res, next) {
   next();
 }
 
-// alias para no romper el header viejo
-router.get("/mis-rentas", ensureLogged, (req, res) => {
-  return res.redirect("/reservations");
-});
-
-
-// GET: mostrar formulario
+// GET: mostrar formulario de reserva de un auto
 router.get("/cars/:id/reserve", ensureLogged, async (req, res) => {
   const carId = req.params.id;
 
@@ -40,7 +34,7 @@ router.get("/cars/:id/reserve", ensureLogged, async (req, res) => {
     car,
     reservations,
     errors: [],
-    formData: {}
+    formData: {},
   });
 });
 
@@ -48,7 +42,6 @@ router.get("/cars/:id/reserve", ensureLogged, async (req, res) => {
 router.post("/cars/:id/reserve", ensureLogged, async (req, res) => {
   const carId = req.params.id;
   const userId = req.session.user.id;
-
   const {
     dateRange,
     first_name,
@@ -59,7 +52,7 @@ router.post("/cars/:id/reserve", ensureLogged, async (req, res) => {
     cc_number,
     cc_exp,
     cc_cvv,
-    notes
+    notes,
   } = req.body;
 
   const errors = [];
@@ -81,9 +74,12 @@ router.post("/cars/:id/reserve", ensureLogged, async (req, res) => {
   }
 
   if (paymentMethod === "credit" || paymentMethod === "debit") {
-    if (!cc_name || cc_name.trim() === "") errors.push("El nombre en la tarjeta es obligatorio.");
-    if (!cc_number || cc_number.trim() === "") errors.push("El número de tarjeta es obligatorio.");
-    if (!cc_exp || cc_exp.trim() === "") errors.push("La fecha de expiración es obligatoria.");
+    if (!cc_name || cc_name.trim() === "")
+      errors.push("El nombre en la tarjeta es obligatorio.");
+    if (!cc_number || cc_number.trim() === "")
+      errors.push("El número de tarjeta es obligatorio.");
+    if (!cc_exp || cc_exp.trim() === "")
+      errors.push("La fecha de expiración es obligatoria.");
     if (!cc_cvv || cc_cvv.trim() === "") errors.push("El CVV es obligatorio.");
   }
 
@@ -109,11 +105,12 @@ router.post("/cars/:id/reserve", ensureLogged, async (req, res) => {
         cc_name,
         cc_number,
         cc_exp,
-        cc_cvv
-      }
+        cc_cvv,
+      },
     });
   }
 
+  // flatpickr manda "YYYY-MM-DD to YYYY-MM-DD"
   const [start_date, end_date] = dateRange.split(" to ");
 
   try {
@@ -127,24 +124,23 @@ router.post("/cars/:id/reserve", ensureLogged, async (req, res) => {
     return res.status(500).send("No se pudo guardar la reserva.");
   }
 
-  // después de crear, vamos a la vista
-  return res.redirect("/reservations");
+  return res.redirect("/mis_reservas");
 });
 
-//  NUEVA RUTA AQUÍ
-router.get("/reservations", ensureLogged, async (req, res) => {
+// LISTAR reservas del usuario
+router.get("/mis_reservas", ensureLogged, async (req, res) => {
   const userId = req.session.user.id;
 
   const [rows] = await pool.query(
     `
     SELECT r.id,
-          r.start_date,
-          r.end_date,
-          r.status,
-          c.brand,
-          c.model,
-          c.image_url,
-          c.price_per_day
+           r.start_date,
+           r.end_date,
+           r.status,
+           c.brand,
+           c.model,
+           c.image_url,
+           c.price_per_day
     FROM reservations r
     JOIN cars c ON r.car_id = c.id
     WHERE r.user_id = ?
@@ -158,12 +154,21 @@ router.get("/reservations", ensureLogged, async (req, res) => {
   });
 });
 
+// alias por si la navbar usa /mis-rentas
+router.get("/mis-rentas", ensureLogged, (req, res) => {
+  // conservar query params si vienen (?refund=1&amount=...)
+  const query = req.url.split("?")[1];
+  if (query) {
+    return res.redirect(`/mis_reservas?${query}`);
+  }
+  return res.redirect("/mis_reservas");
+});
+
 // CANCELAR una reserva
 router.post("/reservas/:id/cancel", ensureLogged, async (req, res) => {
   const reservaId = req.params.id;
   const userId = req.session.user.id;
 
-  // verificar que la reserva sea del usuario
   const [[reserva]] = await pool.query(
     `SELECT id, user_id FROM reservations WHERE id = ?`,
     [reservaId]
@@ -173,8 +178,7 @@ router.post("/reservas/:id/cancel", ensureLogged, async (req, res) => {
     return res.status(404).send("Reserva no encontrada");
   }
 
-  // si no es dueño y no es admin -> no
-  if (reserva.user_id !== userId && (!req.session.user || req.session.user.role !== "admin")) {
+  if (reserva.user_id !== userId && req.session.user.role !== "admin") {
     return res.status(403).send("No puedes cancelar esta reserva");
   }
 
@@ -183,15 +187,14 @@ router.post("/reservas/:id/cancel", ensureLogged, async (req, res) => {
     [reservaId]
   );
 
-  return res.redirect("/reservations");
+  return res.redirect("/mis_reservas");
 });
 
-// FORMULARIO para reprogramar
+// GET: formulario para reprogramar
 router.get("/reservas/:id/editar", ensureLogged, async (req, res) => {
   const reservaId = req.params.id;
   const userId = req.session.user.id;
 
-  // traemos la reserva con el auto
   const [[reserva]] = await pool.query(
     `
     SELECT r.id, r.car_id, r.user_id, r.start_date, r.end_date, r.status,
@@ -207,10 +210,11 @@ router.get("/reservas/:id/editar", ensureLogged, async (req, res) => {
     return res.status(404).send("Reserva no encontrada");
   }
 
-  if (reserva.user_id !== userId && (!req.session.user || req.session.user.role !== "admin")) {
+  if (reserva.user_id !== userId && req.session.user.role !== "admin") {
     return res.status(403).send("No puedes editar esta reserva");
   }
 
+  // otras reservas de ese auto para bloquear fechas, excepto esta
   const [otrasReservas] = await pool.query(
     `
     SELECT start_date, end_date
@@ -222,7 +226,6 @@ router.get("/reservas/:id/editar", ensureLogged, async (req, res) => {
     [reserva.car_id, reservaId]
   );
 
-  // renderizamos una vista muy parecida a reservar
   res.render("edit_reservation", {
     reserva,
     car: {
@@ -237,37 +240,31 @@ router.get("/reservas/:id/editar", ensureLogged, async (req, res) => {
   });
 });
 
-// GUARDAR reprogramación
+// POST: guardar reprogramación (si hay más días, cobrar; si hay menos, avisar)
 router.post("/reservas/:id/editar", ensureLogged, async (req, res) => {
   const reservaId = req.params.id;
   const userId = req.session.user.id;
   const { dateRange } = req.body;
 
   const [[reserva]] = await pool.query(
-    `SELECT id, user_id, car_id FROM reservations WHERE id = ?`,
+    `SELECT id, user_id, car_id, start_date, end_date
+     FROM reservations
+     WHERE id = ?`,
     [reservaId]
   );
 
-  if (!reserva) {
-    return res.status(404).send("Reserva no encontrada");
-  }
-
-  if (reserva.user_id !== userId && (!req.session.user || req.session.user.role !== "admin")) {
+  if (!reserva) return res.status(404).send("Reserva no encontrada");
+  if (reserva.user_id !== userId && req.session.user.role !== "admin") {
     return res.status(403).send("No puedes editar esta reserva");
   }
 
   if (!dateRange || dateRange.trim() === "") {
     const [otrasReservas] = await pool.query(
-      `
-      SELECT start_date, end_date
-      FROM reservations
-      WHERE car_id = ?
-        AND id <> ?
-        AND status <> 'cancelled'
-      `,
+      `SELECT start_date, end_date
+       FROM reservations
+       WHERE car_id = ? AND id <> ? AND status <> 'cancelled'`,
       [reserva.car_id, reservaId]
     );
-
     const [[car]] = await pool.query(
       `SELECT * FROM cars WHERE id = ?`,
       [reserva.car_id]
@@ -277,21 +274,143 @@ router.post("/reservas/:id/editar", ensureLogged, async (req, res) => {
       reserva,
       car,
       reservations: otrasReservas,
-      errors: ["Debes seleccionar un rango de fechas."]
+      errors: ["Debes seleccionar un rango de fechas."],
     });
   }
 
-  const [start_date, end_date] = dateRange.split(" to ");
+  const [new_start, new_end] = dateRange.split(" to ");
 
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const oldDays =
+    Math.round(
+      (new Date(reserva.end_date) - new Date(reserva.start_date)) / msPerDay
+    ) + 1;
+  const newDays =
+    Math.round((new Date(new_end) - new Date(new_start)) / msPerDay) + 1;
+
+  // precio del auto
+  const [[car]] = await pool.query(
+    "SELECT price_per_day, brand, model, image_url FROM cars WHERE id = ?",
+    [reserva.car_id]
+  );
+  const pricePerDay = Number(car?.price_per_day || 0);
+
+  // si son MÁS días → cobrar diferencia
+  const extraDays = Math.max(0, newDays - oldDays);
+  const extraAmount = extraDays * pricePerDay;
+
+  if (extraAmount > 0) {
+    return res.render("pay_difference", {
+      reservaId,
+      car,
+      new_start,
+      new_end,
+      extraAmount,
+      oldDays,
+      newDays,
+      pricePerDay,
+      error: null,
+    });
+  }
+
+  // si son MENOS días → actualizar y mandar query para que el front muestre el mensaje
   await pool.query(
     `UPDATE reservations
      SET start_date = ?, end_date = ?
      WHERE id = ?`,
-    [start_date, end_date, reservaId]
+    [new_start, new_end, reservaId]
   );
 
-  return res.redirect("/reservations");
+  const diasMenos = Math.max(0, oldDays - newDays);
+  const refundAmount = diasMenos * pricePerDay;
+
+  return res.redirect(
+    `/mis_reservas?refund=1&menos=${diasMenos}&amount=${refundAmount}`
+  );
 });
 
+// POST: pagar diferencia y aplicar reprogramación
+router.post("/reservas/:id/pagar_diferencia", ensureLogged, async (req, res) => {
+  const reservaId = req.params.id;
+  const userId = req.session.user.id;
+  const {
+    new_start,
+    new_end,
+    extraAmount,
+    paymentMethod,
+    cc_name,
+    cc_number,
+    cc_exp,
+    cc_cvv,
+  } = req.body;
+
+  if (!new_start || !new_end) {
+    return res.status(400).send("Faltan fechas nuevas.");
+  }
+
+  // 1. Traer reserva original
+  const [[reserva]] = await pool.query(
+    `SELECT id, user_id, car_id, start_date, end_date
+     FROM reservations
+     WHERE id = ?`,
+    [reservaId]
+  );
+
+  if (!reserva) return res.status(404).send("Reserva no encontrada");
+  if (reserva.user_id !== userId && req.session.user.role !== "admin") {
+    return res.status(403).send("No puedes editar esta reserva");
+  }
+
+  // 2. Traer auto para precio
+  const [[car]] = await pool.query(
+    "SELECT price_per_day, brand, model, image_url FROM cars WHERE id = ?",
+    [reserva.car_id]
+  );
+  const pricePerDay = Number(car?.price_per_day || 0);
+
+  // 3. Recalcular diferencia en el servidor
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const oldDays =
+    Math.round(
+      (new Date(reserva.end_date) - new Date(reserva.start_date)) / msPerDay
+    ) + 1;
+  const newDays =
+    Math.round((new Date(new_end) - new Date(new_start)) / msPerDay) + 1;
+  const extraDays = Math.max(0, newDays - oldDays);
+  const serverExtra = extraDays * pricePerDay;
+
+  // 4. Si realmente hay que cobrar, validar pago
+  if (serverExtra > 0) {
+    if (paymentMethod === "credit" || paymentMethod === "debit") {
+      if (!cc_name || !cc_number || !cc_exp || !cc_cvv) {
+        return res.status(400).render("pay_difference", {
+          reservaId,
+          car,
+          new_start,
+          new_end,
+          extraAmount: serverExtra,
+          oldDays,
+          newDays,
+          pricePerDay,
+          error: "Completa los datos de pago.",
+        });
+      }
+    }
+
+    // aquí la pasarela real
+    console.log(`Cobrar ${serverExtra} MXN por diferencia de días`);
+  }
+
+  // 5. Guardar las nuevas fechas
+  await pool.query(
+    `UPDATE reservations
+     SET start_date = ?, end_date = ?
+     WHERE id = ?`,
+    [new_start, new_end, reservaId]
+  );
+
+  //  endpoint SOLO para pagar diferencia
+  return res.redirect("/mis_reservas?paid=1");
+});
 
 export default router;

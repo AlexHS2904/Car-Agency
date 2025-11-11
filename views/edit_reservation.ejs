@@ -12,22 +12,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
       body { background: #0f1214; }
-      .page-wrap { background: #f5f6f8; min-height: 100vh; padding-top: 100px; }
+      .page-wrap { background: #f5f6f8; min-height: 100vh; padding-top: 100px; padding-bottom: 40px; }
       .car-card {
         background: #fff;
         border-radius: 1.5rem;
         overflow: hidden;
         box-shadow: 0 10px 35px rgba(15,15,15,.08);
       }
-      .car-card img { 
-        width: 100%; 
-        height: 180px; 
-        object-fit: cover; 
-      }
-
-      .btn-link{
-        color: red;
-      }
+      .car-card img { width: 100%; height: 180px; object-fit: cover; }
     </style>
   </head>
   <body>
@@ -73,15 +65,14 @@
                     name="dateRange"
                     placeholder="Selecciona las fechas"
                     required
-                    value=""
                   >
-                  <div class="form-text">Las fechas ya ocupadas están bloqueadas.</div>
+                  <div class="form-text">Las fechas ocupadas están bloqueadas.</div>
                 </div>
 
                 <button type="submit" class="btn btn-outline-dark">
                   Guardar cambios
                 </button>
-                <a href="/reservations" class="btn btn-link">Volver</a>
+                <a href="/mis_reservas" class="btn btn-link">Volver</a>
               </form>
             </div>
           </div>
@@ -89,14 +80,13 @@
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-    <!-- pasamos las reservas de este auto para bloquear -->
+    <!-- datos de reservas para bloquear -->
     <script id="reservations-data" type="application/json">
       <%- JSON.stringify(reservations || []) %>
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
       const booked = JSON.parse(document.getElementById("reservations-data").textContent || "[]");
       const disabled = booked.map(r => ({
@@ -104,7 +94,6 @@
         to: r.end_date
       }));
 
-      // iniciamos flatpickr
       flatpickr("#dateRange", {
         mode: "range",
         dateFormat: "Y-m-d",

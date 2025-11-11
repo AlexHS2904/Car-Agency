@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pagar diferencia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- tu css global -->
+    <link rel="stylesheet" href="/Assets/styles.css" />
+    <!-- bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body { background: #0f1214; }
+      .page-wrap {
+        background: #f5f6f8;
+        min-height: 100vh;
+        padding-top: 100px;
+        padding-bottom: 40px;
+      }
+      .car-card {
+        background: #fff;
+        border-radius: 1.5rem;
+        overflow: hidden;
+        box-shadow: 0 10px 35px rgba(15,15,15,.08);
+      }
+      .car-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+      .summary-card {
+        background: #fff;
+        border-radius: 1.25rem;
+        box-shadow: 0 10px 35px rgba(15,15,15,.05);
+      }
+    </style>
+  </head>
+  <body>
+    <%- include("partials/header.ejs") %>
+
+    <div class="page-wrap">
+      <div class="container">
+        <div class="row g-4">
+          <!-- columna izquierda: auto / resumen -->
+          <div class="col-md-4">
+            <div class="car-card mb-4">
+              <img
+                src="<%= car && car.image_url && car.image_url !== '' ? car.image_url : '/Assets/Imgs/placeholder-car.jpg' %>"
+                alt="<%= car ? (car.brand + ' ' + car.model) : 'Auto' %>"
+              >
+              <div class="p-3">
+                <h5 class="mb-1">
+                  <%= car ? (car.brand + ' ' + car.model) : 'Auto reservado' %>
+                </h5>
+                <p class="text-muted mb-2">
+                  $<%= Number(pricePerDay).toLocaleString('es-MX') %> MXN/día
+                </p>
+                <div class="alert alert-info py-2 mb-0">
+                  Estás extendiendo tu reserva de
+                  <strong><%= oldDays %></strong> a
+                  <strong><%= newDays %></strong> días.
+                </div>
+              </div>
+            </div>
+
+            <div class="summary-card p-3">
+              <h6 class="mb-3">Resumen</h6>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Días anteriores</span>
+                <strong><%= oldDays %></strong>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Días nuevos</span>
+                <strong><%= newDays %></strong>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Precio por día</span>
+                <strong>$<%= Number(pricePerDay).toLocaleString('es-MX') %></strong>
+              </div>
+              <hr>
+              <div class="d-flex justify-content-between">
+                <span>Diferencia a pagar</span>
+                <strong>$<%= Number(extraAmount).toLocaleString('es-MX') %> MXN</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- columna derecha: formulario de pago -->
+          <div class="col-md-8">
+            <div class="bg-white rounded-4 p-4 shadow-sm">
+              <h4 class="mb-3">Pagar diferencia</h4>
+              <p class="text-muted">
+                Selecciona tu método de pago para confirmar la reprogramación.
+              </p>
+
+              <% if (error) { %>
+                <div class="alert alert-danger">
+                  <%= error %>
+                </div>
+              <% } %>
+
+              <form action="/reservas/<%= reservaId %>/pagar_diferencia" method="POST" class="needs-validation" novalidate>
+                <!-- datos ocultos para aplicar el cambio -->
+                <input type="hidden" name="new_start" value="<%= new_start %>">
+                <input type="hidden" name="new_end" value="<%= new_end %>">
+                <input type="hidden" name="extraAmount" value="<%= extraAmount %>">
+
+                <!-- método de pago -->
+                <h5 class="mb-3">Método de pago</h5>
+                <div class="my-3">
+                  <div class="form-check">
+                    <input
+                      id="credit"
+                      name="paymentMethod"
+                      value="credit"
+                      type="radio"
+                      class="form-check-input"
+                      checked
+                      required
+                    >
+                    <label class="form-check-label" for="credit">Tarjeta de crédito</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      id="debit"
+                      name="paymentMethod"
+                      value="debit"
+                      type="radio"
+                      class="form-check-input"
+                    >
+                    <label class="form-check-label" for="debit">Tarjeta de débito</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      id="transfer"
+                      name="paymentMethod"
+                      value="transfer"
+                      type="radio"
+                      class="form-check-input"
+                    >
+                    <label class="form-check-label" for="transfer">Transferencia / pago en sitio</label>
+                  </div>
+                </div>
+
+                <!-- datos de tarjeta -->
+                <div class="row gy-3 mt-1" id="card-fields">
+                  <div class="col-md-6">
+                    <label class="form-label">Nombre en la tarjeta</label>
+                    <input type="text" class="form-control" name="cc_name" placeholder="Como aparece en la tarjeta">
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label">Número de tarjeta</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="cc_number"
+                      placeholder="•••• •••• •••• ••••"
+                      inputmode="numeric"
+                      maxlength="19"
+                    />
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label">Expira (MM/AA)</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="cc_exp"
+                      placeholder="MM/AA"
+                      maxlength="5"
+                      inputmode="numeric"
+                    >
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label">CVV</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="cc_cvv"
+                      placeholder="123"
+                      maxlength="4"
+                      inputmode="numeric"
+                    >
+                  </div>
+                </div>
+
+                <hr class="my-4">
+
+                <button class="w-100 btn btn-outline-dark btn-lg" type="submit">
+                  Pagar diferencia y guardar
+                </button>
+                <a href="/mis_reservas" class="btn btn-link mt-2">Cancelar</a>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // mostrar/ocultar tarjeta
+      const paymentRadios = document.querySelectorAll("input[name='paymentMethod']");
+      const cardFields = document.getElementById("card-fields");
+
+      function toggleCardFields() {
+        const selected = document.querySelector("input[name='paymentMethod']:checked").value;
+        if (selected === "credit" || selected === "debit") {
+          cardFields.style.display = "flex";
+        } else {
+          cardFields.style.display = "none";
+        }
+      }
+
+      paymentRadios.forEach(r => r.addEventListener("change", toggleCardFields));
+      toggleCardFields();
+
+      const cardInput = document.querySelector("input[name='cc_number']");
+      if (cardInput) {
+        cardInput.addEventListener("input", (e) => {
+          let value = e.target.value.replace(/\D/g, "").slice(0, 16);
+          value = value.replace(/(.{4})/g, "$1 ").trim();
+          e.target.value = value;
+        });
+      }
+    </script>
+  </body>
+</html>
