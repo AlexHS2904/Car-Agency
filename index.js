@@ -51,23 +51,19 @@ function ensureAdmin(req, res, next) {
   next();
 }
 
-// 4) Rutas de admin (protegidas)
-app.use("/admin", ensureAdmin, adminRoutes);
+/* =========================
+        RUTAS PÚBLICAS
+   ========================= */
 
-// 4.1) Rutas de reservas
-app.use("/", reservationsRoutes);
-
-// 5) Rutas principales
-
-// Home
+// HOME
 app.get("/", async (req, res) => {
   try {
     const [miniCars] = await pool.query(
       `SELECT id, brand, model, year, price_per_day, image_url
-      FROM cars
-      WHERE status = 'available'
-      ORDER BY RAND()
-      LIMIT 13`
+       FROM cars
+       WHERE status = 'available'
+       ORDER BY RAND()
+       LIMIT 13`
     );
 
     res.render("index", { miniCars });
@@ -77,13 +73,13 @@ app.get("/", async (req, res) => {
   }
 });
 
-// LOGIN
+// LOGIN (GET)
 app.get("/login", (req, res) => {
-  // si viene en la query lo mandamos a la vista
   const returnTo = req.query.returnTo || "";
   res.render("login", { error: null, returnTo });
 });
 
+// LOGIN (POST)
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const returnTo = req.body.returnTo;
@@ -136,17 +132,53 @@ app.post("/login", async (req, res) => {
     });
   }
 });
-  
-// ADMIN directo
-app.get("/admin", ensureAdmin, (req, res) => {
-  return res.redirect("/admin/dashboard");
+
+// REGISTER (GET)
+app.get("/register", (req, res) => {
+  res.render("register", { error: null });
 });
 
-// CERRAR SESIÓN
-app.post("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/");
-  });
+// REGISTER (POST)
+app.post("/register", async (req, res) => {
+  const { name, email, phone, password, confirmPassword } = req.body;
+
+  if (password !== confirmPassword) {
+    return res.status(400).render("register", {
+      error: "Las contraseñas no coinciden",
+    });
+  }
+
+  try {
+    const [existing] = await pool.query(
+      "SELECT id FROM users WHERE email = ?",
+      [email]
+    );
+
+    if (existing.length > 0) {
+      return res.status(400).render("register", {
+        error: "Ya existe una cuenta con ese correo",
+      });
+    }
+
+    const [result] = await pool.query(
+      "INSERT INTO users (name, email, phone, password, role_id) VALUES (?, ?, ?, ?, ?)",
+      [name, email, phone || null, password, 2] // 2 = usuario normal
+    );
+
+    req.session.user = {
+      id: result.insertId,
+      email,
+      role: "user",
+      name,
+    };
+
+    return res.redirect("/");
+  } catch (err) {
+    console.error("Error en register:", err);
+    return res.status(500).render("register", {
+      error: "Error al registrar. Intenta de nuevo.",
+    });
+  }
 });
 
 // CATÁLOGO
@@ -186,6 +218,28 @@ app.get("/catalogo", async (req, res) => {
       filters: { year, tipo, max_price },
     });
   }
+});
+
+// CERRAR SESIÓN
+app.post("/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.redirect("/");
+  });
+});
+
+/* =========================
+   RUTAS PROTEGIDAS / MODULARES
+   ========================= */
+
+// admin primero
+app.use("/admin", ensureAdmin, adminRoutes);
+
+// (que adentro tienen ensureLogged en lo que corresponde)
+app.use("/", reservationsRoutes);
+
+// ADMIN directo
+app.get("/admin", ensureAdmin, (req, res) => {
+  return res.redirect("/admin/dashboard");
 });
 
 // levantar server
