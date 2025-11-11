@@ -48,3 +48,12 @@ dist/
 build/
 temp/
 tmp/
+
+
+# ────────────────
+# Envs
+# ───────
+
+.env
+.env.local
+.env.production

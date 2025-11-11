@@ -1,9 +1,12 @@
+// index.js
 import express from "express";
 import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
+
 import pool from "./db.js";
 import adminRoutes from "./routes/admin.js";
+import reservationsRoutes from "./routes/reservations.js";
 
 const app = express();
 
@@ -27,7 +30,7 @@ app.use(
   })
 );
 
-// 3) Hacer disponible el usuario en las vistas
+// 3) Usuario disponible en las vistas
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   next();
@@ -48,15 +51,17 @@ function ensureAdmin(req, res, next) {
   next();
 }
 
-// 4) Rutas de admin (ya con middlewares definidos arriba)
-app.use("/admin", adminRoutes);
+// 4) Rutas de admin (protegidas)
+app.use("/admin", ensureAdmin, adminRoutes);
 
-// 5) Rutas
+// 4.1) Rutas de reservas
+app.use("/", reservationsRoutes);
+
+// 5) Rutas principales
 
 // Home
 app.get("/", async (req, res) => {
   try {
-    // trae 7 autos random disponibles
     const [miniCars] = await pool.query(
       `SELECT id, brand, model, year, price_per_day, image_url
        FROM cars
@@ -71,7 +76,6 @@ app.get("/", async (req, res) => {
     res.render("index", { miniCars: [] });
   }
 });
-
 
 // LOGIN
 app.get("/login", (req, res) => {
@@ -98,21 +102,19 @@ app.post("/login", async (req, res) => {
 
     const user = rows[0];
 
-    // TODO: encriptar después
+    // TODO: password hasheado
     if (user.password !== password) {
       return res
         .status(401)
         .render("login", { error: "Usuario o contraseña incorrectos" });
     }
 
-    // guardar en sesión
     req.session.user = {
       id: user.id,
       email: user.email,
       role: user.role,
     };
 
-    // redirigir según rol
     if (user.role === "admin") {
       return res.redirect("/admin/dashboard");
     } else {
@@ -125,7 +127,6 @@ app.post("/login", async (req, res) => {
 });
 
 // REGISTER
-
 app.get("/register", (req, res) => {
   res.render("register", { error: null });
 });
@@ -151,7 +152,6 @@ app.post("/register", async (req, res) => {
       });
     }
 
-    // insertamos en la BD
     const [result] = await pool.query(
       "INSERT INTO users (name, email, phone, password, role_id) VALUES (?, ?, ?, ?, ?)",
       [name, email, phone || null, password, 2] // 2 = usuario normal
@@ -159,12 +159,11 @@ app.post("/register", async (req, res) => {
 
     req.session.user = {
       id: result.insertId,
-      email: email,
+      email,
       role: "user",
-      name: name,
+      name,
     };
 
-    // lo mandamos al home o a /catalogo
     return res.redirect("/");
   } catch (err) {
     console.error("Error en register:", err);
@@ -174,9 +173,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-
-// ADMIN directo (por si entran a /admin)
-// lo protegemos y lo mandamos al dashboard
+// ADMIN directo
 app.get("/admin", ensureAdmin, (req, res) => {
   return res.redirect("/admin/dashboard");
 });
@@ -223,29 +220,6 @@ app.get("/catalogo", async (req, res) => {
     return res.render("catalogo", {
       cars: [],
       filters: { year, tipo, max_price },
-    });
-  }
-});
-
-// DEBUG: ver qué ve Render
-app.get("/debug-cars", async (req, res) => {
-  try {
-    const [rows] = await pool.query("SELECT * FROM cars");
-    res.send({
-      env: {
-        DB_HOST: process.env.DB_HOST,
-        DB_PORT: process.env.DB_PORT,
-        DB_NAME: process.env.DB_NAME,
-        DB_USER: process.env.DB_USER,
-      },
-      total: rows.length,
-      sample: rows.slice(0, 5),
-    });
-  } catch (err) {
-    console.error("DEBUG ERROR /debug-cars:", err);
-    res.status(500).send({
-      error: err.message,
-      code: err.code,
     });
   }
 });
