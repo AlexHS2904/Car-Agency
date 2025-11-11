@@ -79,11 +79,15 @@ app.get("/", async (req, res) => {
 
 // LOGIN
 app.get("/login", (req, res) => {
-  res.render("login", { error: null });
+  // si viene en la query lo mandamos a la vista
+  const returnTo = req.query.returnTo || "";
+  res.render("login", { error: null, returnTo });
 });
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
+  //lo traemos del body
+  const returnTo = req.body.returnTo;
 
   try {
     const [rows] = await pool.query(
@@ -97,16 +101,15 @@ app.post("/login", async (req, res) => {
     if (rows.length === 0) {
       return res
         .status(401)
-        .render("login", { error: "Usuario o contraseña incorrectos" });
+        .render("login", { error: "Usuario o contraseña incorrectos", returnTo });
     }
 
     const user = rows[0];
 
-    // TODO: password hasheado
     if (user.password !== password) {
       return res
         .status(401)
-        .render("login", { error: "Usuario o contraseña incorrectos" });
+        .render("login", { error: "Usuario o contraseña incorrectos", returnTo });
     }
 
     req.session.user = {
@@ -115,6 +118,12 @@ app.post("/login", async (req, res) => {
       role: user.role,
     };
 
+    // si venías de una página, ve ahí
+    if (returnTo && returnTo.trim() !== "") {
+      return res.redirect(returnTo);
+    }
+
+    // si no, lo de siempre
     if (user.role === "admin") {
       return res.redirect("/admin/dashboard");
     } else {
@@ -122,56 +131,13 @@ app.post("/login", async (req, res) => {
     }
   } catch (err) {
     console.error("Error en login:", err);
-    return res.status(500).render("login", { error: "Error en el servidor" });
-  }
-});
-
-// REGISTER
-app.get("/register", (req, res) => {
-  res.render("register", { error: null });
-});
-
-app.post("/register", async (req, res) => {
-  const { name, email, phone, password, confirmPassword } = req.body;
-
-  if (password !== confirmPassword) {
-    return res.status(400).render("register", {
-      error: "Las contraseñas no coinciden",
-    });
-  }
-
-  try {
-    const [existing] = await pool.query(
-      "SELECT id FROM users WHERE email = ?",
-      [email]
-    );
-
-    if (existing.length > 0) {
-      return res.status(400).render("register", {
-        error: "Ya existe una cuenta con ese correo",
-      });
-    }
-
-    const [result] = await pool.query(
-      "INSERT INTO users (name, email, phone, password, role_id) VALUES (?, ?, ?, ?, ?)",
-      [name, email, phone || null, password, 2] // 2 = usuario normal
-    );
-
-    req.session.user = {
-      id: result.insertId,
-      email,
-      role: "user",
-      name,
-    };
-
-    return res.redirect("/");
-  } catch (err) {
-    console.error("Error en register:", err);
-    return res.status(500).render("register", {
-      error: "Error al registrar. Intenta de nuevo.",
+    return res.status(500).render("login", {
+      error: "Error en el servidor",
+      returnTo,
     });
   }
 });
+
 
 // ADMIN directo
 app.get("/admin", ensureAdmin, (req, res) => {

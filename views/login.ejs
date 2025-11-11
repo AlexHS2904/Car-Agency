@@ -125,6 +125,8 @@
           </div>
         <% } %>
 
+          <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
+
         <div class="form-floating mb-2">
           <input
             type="text"
