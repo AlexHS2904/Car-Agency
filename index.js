@@ -142,29 +142,53 @@ app.get("/register", (req, res) => {
 app.post("/register", async (req, res) => {
   const { name, email, phone, password, confirmPassword } = req.body;
 
+  // 1. validaciones básicas
+  const formData = { name, email, phone };
+  if (!name || !email || !password || !confirmPassword) {
+    return res.status(400).render("register", {
+      error: "Todos los campos obligatorios deben llenarse.",
+      formData,
+    });
+  }
+
   if (password !== confirmPassword) {
     return res.status(400).render("register", {
       error: "Las contraseñas no coinciden",
+      formData,
     });
   }
 
   try {
-    const [existing] = await pool.query(
+    // 2. ¿ya existe ese correo?
+    const [byEmail] = await pool.query(
       "SELECT id FROM users WHERE email = ?",
       [email]
     );
-
-    if (existing.length > 0) {
+    if (byEmail.length > 0) {
       return res.status(400).render("register", {
-        error: "Ya existe una cuenta con ese correo",
+        error: "Ya existe una cuenta con ese correo.",
+        formData,
       });
     }
 
+    const [byName] = await pool.query(
+      "SELECT id FROM users WHERE name = ?",
+      [name]
+    );
+    if (byName.length > 0) {
+      return res.status(400).render("register", {
+        error: "Ese nombre ya está en uso.",
+        formData,
+      });
+    }
+
+    // 4. crear usuario
     const [result] = await pool.query(
       "INSERT INTO users (name, email, phone, password, role_id) VALUES (?, ?, ?, ?, ?)",
       [name, email, phone || null, password, 2] // 2 = usuario normal
     );
 
+    // 5. iniciar sesión automático
     req.session.user = {
       id: result.insertId,
       email,
@@ -177,9 +201,11 @@ app.post("/register", async (req, res) => {
     console.error("Error en register:", err);
     return res.status(500).render("register", {
       error: "Error al registrar. Intenta de nuevo.",
+      formData,
     });
   }
 });
+
 
 // CATÁLOGO
 app.get("/catalogo", async (req, res) => {
