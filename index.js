@@ -64,10 +64,10 @@ app.get("/", async (req, res) => {
   try {
     const [miniCars] = await pool.query(
       `SELECT id, brand, model, year, price_per_day, image_url
-       FROM cars
-       WHERE status = 'available'
-       ORDER BY RAND()
-       LIMIT 13`
+      FROM cars
+      WHERE status = 'available'
+      ORDER BY RAND()
+      LIMIT 13`
     );
 
     res.render("index", { miniCars });
@@ -86,7 +86,6 @@ app.get("/login", (req, res) => {
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  //lo traemos del body
   const returnTo = req.body.returnTo;
 
   try {
@@ -137,8 +136,7 @@ app.post("/login", async (req, res) => {
     });
   }
 });
-
-
+  
 // ADMIN directo
 app.get("/admin", ensureAdmin, (req, res) => {
   return res.redirect("/admin/dashboard");

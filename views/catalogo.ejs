@@ -259,13 +259,12 @@
                   <p class="fw-semibold mb-3" style="font-size: 1.05rem;">
                     $<%= Number(car.price_per_day).toLocaleString('es-MX') %> MXN/día
                   </p>
-
                   <% if (currentUser) { %>
                     <a href="/cars/<%= car.id %>/reserve" class="btn btn-sm btn-outline-dark w-100">
                       Rentar
                     </a>
                   <% } else { %>
-                    <a href="/login" class="btn btn-sm btn-outline-dark w-100">
+                    <a href="/login?returnTo=/cars/<%= car.id %>/reserve" class="btn btn-sm btn-outline-dark w-100">
                       Rentar
                     </a>
                   <% } %>

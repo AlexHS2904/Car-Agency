@@ -5,9 +5,13 @@
     <title>Reservar <%= car.brand %> <%= car.model %></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&family=M+PLUS+Rounded+1c&display=swap"
+      rel="stylesheet"
+    />
     <style>
       body { background: #0f1214; }
-      .page-wrap { background: #f5f6f8; min-height: 100vh; }
+      .page-wrap { background: #f5f6f8; min-height: 100vh; padding-top: 100px; }
       .car-card {
         background: #fff;
         border-radius: 1.5rem;
@@ -15,30 +19,28 @@
         box-shadow: 0 10px 35px rgba(15,15,15,.08);
       }
 
-      a{
-        text-decoration: none;
-        color: #0f1214;
-        width: auto;
-      }
+    #card-fields {
+  display: flex;
+}
+#card-fields.is-hidden {
+  display: none;
+}
 
-      a:hover{
-        color: white;
-      }
 
       .form-control:focus {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 0.25rem rgba(199, 67, 67, 0.15) !important;
-        }
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.25rem rgba(199, 67, 67, 0.15) !important;
+      }
 
-        .form-check-input:checked {
-            background-color: #dc3545;
-            border-color: #dc3545;
-        }
+      .form-check-input:checked {
+        background-color: #dc3545;
+        border-color: #dc3545;
+      }
 
-        .form-check-input:focus {
-            border-color: #dc3545;
-            box-shadow: 0 0 0 .25rem rgba(220, 53, 69, 0.25);
-        }
+      .form-check-input:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 .25rem rgba(220, 53, 69, 0.25);
+      }
 
       .car-card img {
         width: 100%;
@@ -48,10 +50,18 @@
       .price-big {
         font-size: 1.2rem;
       }
+
+      button{
+        font-family: "Montserrat", sans-serif !important;
+        font-optical-sizing: auto;
+        font-weight: 400 !important;
+        font-style: normal;
+      }
     </style>
   </head>
   <body>
-    <div class="page-wrap py-5">
+    <%- include("partials/header.ejs") %>
+    <div class="page-wrap">
       <div class="container">
         <div class="row g-5">
           <!-- columna izquierda: auto / resumen -->
@@ -80,7 +90,6 @@
                 <p class="fw-semibold mb-3 price-big">
                   $<%= Number(car.price_per_day).toLocaleString('es-MX') %> MXN/día
                 </p>
-                <!-- aquí va lo creativo -->
                 <div class="alert alert-success py-2 mb-0">
                   <strong>Auto seleccionado</strong><br>
                   Completa los datos para confirmar tu reserva.
@@ -90,154 +99,231 @@
 
             <!-- resumen dinámico -->
             <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span>Resumen</span>
-                        <span class="badge bg-dark" id="days-badge">0 días</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between mb-2">
-                        <span>Renta por día</span>
-                        <span>$<%= Number(car.price_per_day).toLocaleString('es-MX') %></span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                        <span>Subtotal</span>
-                        <strong id="subtotal-text">$0 MXN</strong>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between">
-                        <span>Total</span>
-                        <strong id="total-text">$0 MXN</strong>
-                        </div>
-                        <p class="text-muted mt-2 mb-0 small">
-                        * El total se calcula según las fechas seleccionadas.
-                        </p>
-                    </div>
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Resumen</span>
+                <span class="badge bg-dark" id="days-badge">0 días</span>
+              </div>
+              <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Renta por día</span>
+                  <span>$<%= Number(car.price_per_day).toLocaleString('es-MX') %></span>
                 </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Subtotal</span>
+                  <strong id="subtotal-text">$0 MXN</strong>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                  <span>Total</span>
+                  <strong id="total-text">$0 MXN</strong>
+                </div>
+                <p class="text-muted mt-2 mb-0 small">
+                  * El total se calcula según las fechas seleccionadas.
+                </p>
+              </div>
             </div>
-
-<!-- columna derecha: formulario -->
-        <div class="col-md-7 col-lg-8">
-  <div class="bg-white rounded-4 p-4 shadow-sm">
-    <h4 class="mb-3">Datos de la reserva</h4>
-    <form action="/cars/<%= car.id %>/reserve" method="POST" class="needs-validation" novalidate>
-      <div class="row g-3">
-        <div class="col-12">
-          <label class="form-label">Rango de fechas</label>
-          <input
-            type="text"
-            class="form-control"
-            id="dateRange"
-            name="dateRange"
-            placeholder="Selecciona las fechas"
-            required
-          >
-          <div class="form-text">
-            Las fechas ya reservadas por otros usuarios estarán bloqueadas.
           </div>
+
+          <!-- columna derecha: formulario -->
+          <div class="col-md-7 col-lg-8">
+            <div class="bg-white rounded-4 p-4 shadow-sm">
+              <h4 class="mb-3">Datos de la reserva</h4>
+
+              <!-- BLOQUE DE ERRORES -->
+              <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+                <div class="alert alert-danger">
+                  <h6 class="mb-2">Revisa estos campos:</h6>
+                  <ul class="mb-0">
+                    <% errors.forEach(function(err) { %>
+                      <li><%= err %></li>
+                    <% }) %>
+                  </ul>
+                </div>
+              <% } %>
+
+              <form action="/cars/<%= car.id %>/reserve" method="POST" class="needs-validation">
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label class="form-label">Rango de fechas</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="dateRange"
+                      name="dateRange"
+                      placeholder="Selecciona las fechas"
+                      required
+                    >
+                    <div class="form-text">
+                      Las fechas ya reservadas por otros usuarios estarán bloqueadas.
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label">Nombre</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="first_name"
+                      placeholder="Nombre"
+                      required
+                      value="<%= formData && formData.first_name ? formData.first_name : '' %>"
+                    >
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Apellidos</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="last_name"
+                      placeholder="Apellidos"
+                      required
+                      value="<%= formData && formData.last_name ? formData.last_name : '' %>"
+                    >
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Correo de contacto</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      name="email"
+                      placeholder="tú@ejemplo.com"
+                      required
+                      value="<%= formData && formData.email ? formData.email : '' %>"
+                    >
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label">Comentarios (opcional)</label>
+                    <textarea
+                      name="notes"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Indica horarios, sucursal, etc."
+                    ><%= formData && formData.notes ? formData.notes : '' %></textarea>
+                  </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- MÉTODO DE PAGO -->
+                <h4 class="mb-3">Pago</h4>
+                <div class="my-3">
+                  <div class="form-check">
+                    <input
+                      id="credit"
+                      name="paymentMethod"
+                      value="credit"
+                      type="radio"
+                      class="form-check-input"
+                      <%= (!formData || !formData.paymentMethod || formData.paymentMethod === 'credit') ? 'checked' : '' %>
+                      required
+                    >
+                    <label class="form-check-label" for="credit">Tarjeta de crédito</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      id="debit"
+                      name="paymentMethod"
+                      value="debit"
+                      type="radio"
+                      class="form-check-input"
+                      <%= formData && formData.paymentMethod === 'debit' ? 'checked' : '' %>
+                    >
+                    <label class="form-check-label" for="debit">Tarjeta de débito</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      id="transfer"
+                      name="paymentMethod"
+                      value="transfer"
+                      type="radio"
+                      class="form-check-input"
+                      <%= formData && formData.paymentMethod === 'transfer' ? 'checked' : '' %>
+                    >
+                    <label class="form-check-label" for="transfer">Transferencia / pago en sitio</label>
+                  </div>
+                </div>
+
+                <!-- mostrar u ocultar según lo que venga -->
+                <% const showCard = (!formData || !formData.paymentMethod || formData.paymentMethod === 'credit' || formData.paymentMethod === 'debit'); %>
+
+                <!-- datos de tarjeta -->
+                <div
+                    class="row gy-3 mt-1 <%= showCard ? '' : 'is-hidden' %>"
+                    id="card-fields"
+                >
+                  <div class="col-md-6">
+                    <label for="cc-name" class="form-label">Nombre en la tarjeta</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="cc-name"
+                      name="cc_name"
+                      placeholder=""
+                      value="<%= formData && formData.cc_name ? formData.cc_name : '' %>"
+                    >
+                    <small class="text-body-secondary">Como aparece en la tarjeta</small>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="cc-number" class="form-label">Número de tarjeta</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="cc-number"
+                      name="cc_number"
+                      placeholder="•••• •••• •••• ••••"
+                      inputmode="numeric"
+                      maxlength="19"
+                      value="<%= formData && formData.cc_number ? formData.cc_number : '' %>"
+                    />
+                  </div>
+
+                  <div class="col-md-3">
+                    <label for="cc-expiration" class="form-label">Expira</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="cc-expiration"
+                      name="cc_exp"
+                      placeholder="MM/AA"
+                      maxlength="5"
+                      inputmode="numeric"
+                      autocomplete="cc-exp"
+                      value="<%= formData && formData.cc_exp ? formData.cc_exp : '' %>"
+                    >
+                  </div>
+
+                  <div class="col-md-3">
+                    <label for="cc-cvv" class="form-label">CVV</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="cc-cvv"
+                      name="cc_cvv"
+                      placeholder="123"
+                      maxlength="4"
+                      inputmode="numeric"
+                      autocomplete="off"
+                      value="<%= formData && formData.cc_cvv ? formData.cc_cvv : '' %>"
+                    >
+                  </div>
+                </div>
+
+                <!-- total calculado -->
+                <input type="hidden" name="calculated_total" id="calculated_total" value="0">
+
+                <hr class="my-4">
+
+                <button class="w-100 btn btn-outline-dark btn-lg" type="submit">
+                  Crear reserva
+                </button>
+              </form>
+            </div>
+          </div>
+
         </div>
-
-        <div class="col-md-6">
-          <label class="form-label">Nombre</label>
-          <input type="text" class="form-control" name="first_name" placeholder="Tu nombre" required>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Apellidos</label>
-          <input type="text" class="form-control" name="last_name" placeholder="Tus apellidos" required>
-        </div>
-
-        <div class="col-12">
-          <label class="form-label">Correo de contacto</label>
-          <input type="email" class="form-control" name="email" placeholder="tú@ejemplo.com">
-        </div>
-
-        <div class="col-12">
-          <label class="form-label">Comentarios (opcional)</label>
-          <textarea name="notes" class="form-control" rows="3" placeholder="Indica horarios, sucursal, etc."></textarea>
-        </div>
-      </div>
-
-      <hr class="my-4">
-
-      <!-- MÉTODO DE PAGO -->
-      <h4 class="mb-3">Pago</h4>
-      <div class="my-3">
-        <div class="form-check">
-          <input id="credit" name="paymentMethod" value="credit" type="radio" class="form-check-input" checked required>
-          <label class="form-check-label" for="credit">Tarjeta de crédito</label>
-        </div>
-        <div class="form-check">
-          <input id="debit" name="paymentMethod" value="debit" type="radio" class="form-check-input">
-          <label class="form-check-label" for="debit">Tarjeta de débito</label>
-        </div>
-        <div class="form-check">
-          <input id="transfer" name="paymentMethod" value="transfer" type="radio" class="form-check-input">
-          <label class="form-check-label" for="transfer">Transferencia / pago en sitio</label>
-        </div>
-      </div>
-
-      <!-- datos de tarjeta -->
-      <div class="row gy-3 mt-1" id="card-fields">
-        <div class="col-md-6">
-          <label for="cc-name" class="form-label">Nombre en la tarjeta</label>
-          <input type="text" class="form-control" id="cc-name" name="cc_name" placeholder="">
-          <small class="text-body-secondary">Como aparece en la tarjeta</small>
-        </div>
-
-        <div class="col-md-6">
-            <label for="cc-number" class="form-label">Número de tarjeta</label>
-            <input
-                type="text"
-                class="form-control"
-                id="cc-number"
-                name="cc_number"
-                placeholder="•••• •••• •••• ••••"
-                inputmode="numeric"
-                maxlength="19"
-            />
-        </div>
-
-        <div class="col-md-3">
-  <label for="cc-expiration" class="form-label">Expira</label>
-  <input
-    type="text"
-    class="form-control"
-    id="cc-expiration"
-    name="cc_exp"
-    placeholder="MM/AA"
-    maxlength="5"
-    inputmode="numeric"
-    autocomplete="cc-exp"
-  >
-</div>
-
-<div class="col-md-3">
-  <label for="cc-cvv" class="form-label">CVV</label>
-  <input
-    type="text"
-    class="form-control"
-    id="cc-cvv"
-    name="cc_cvv"
-    placeholder=""
-    maxlength="4"
-    inputmode="numeric"
-    autocomplete="off"
-  >
-</div>
-
-      </div>
-
-      <!-- total calculado -->
-      <input type="hidden" name="calculated_total" id="calculated_total" value="0">
-
-      <hr class="my-4">
-
-      <button class="w-100 btn btn-outline-dark btn-lg" type="submit">
-        <a href="/reservas/nueva?car_id=<%= car.id %>" class="w-100">Crear reserva</a>
-      </button>
-    </form>
-  </div>
-</div>
-
       </div>
     </div>
 
@@ -250,18 +336,10 @@
       <%- JSON.stringify(reservations || []) %>
     </script>
 
-        <!-- ponemos el precio en un data-atributo -->
+    <!--  precio en un data-atributo -->
     <div id="car-meta"
          data-price-per-day="<%= car.price_per_day %>">
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-    <!-- datos de reservas del backend -->
-    <script id="reservations-data" type="application/json">
-      <%- JSON.stringify(reservations || []) %>
-    </script>
 
     <script>
       const booked = JSON.parse(document.getElementById("reservations-data").textContent || "[]");
@@ -270,96 +348,110 @@
         to: r.end_date
       }));
 
-      //  JS
-    const pricePerDay = Number(
-  document.getElementById("car-meta").dataset.pricePerDay
-);
+      const pricePerDay = Number(
+        document.getElementById("car-meta").dataset.pricePerDay
+      );
 
-const totalInput = document.getElementById("calculated_total");
+      const totalInput = document.getElementById("calculated_total");
 
-const fp = flatpickr("#dateRange", {
-  mode: "range",
-  dateFormat: "Y-m-d",
-  minDate: "today",
-  disable: disabled,
-  onChange: function(selectedDates) {
-    if (selectedDates.length === 2) {
-      const msPerDay = 1000 * 60 * 60 * 24;
-      const diff = Math.round((selectedDates[1] - selectedDates[0]) / msPerDay) + 1;
-      const subtotal = diff * pricePerDay;
-      const formatter = new Intl.NumberFormat('es-MX');
+      const fp = flatpickr("#dateRange", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabled,
+        onChange: function(selectedDates) {
+          if (selectedDates.length === 2) {
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const diff = Math.round((selectedDates[1] - selectedDates[0]) / msPerDay) + 1;
+            const subtotal = diff * pricePerDay;
+            const formatter = new Intl.NumberFormat('es-MX');
 
-      document.getElementById("days-badge").textContent = diff + " día" + (diff > 1 ? "s" : "");
-      document.getElementById("subtotal-text").textContent = "$" + formatter.format(subtotal) + " MXN";
-      document.getElementById("total-text").textContent = "$" + formatter.format(subtotal) + " MXN";
+            document.getElementById("days-badge").textContent = diff + " día" + (diff > 1 ? "s" : "");
+            document.getElementById("subtotal-text").textContent = "$" + formatter.format(subtotal) + " MXN";
+            document.getElementById("total-text").textContent = "$" + formatter.format(subtotal) + " MXN";
 
-      // guardamos el total en el input oculto para el POST
-      totalInput.value = subtotal;
-    }
-  }
-});
+            // guardamos el total en el input oculto para el POST
+            totalInput.value = subtotal;
+          }
+        }
+      });
 
-// mostrar/ocultar campos de tarjeta
-const paymentRadios = document.querySelectorAll("input[name='paymentMethod']");
-const cardFields = document.getElementById("card-fields");
+      // mostrar/ocultar campos de tarjeta según radio
+      const paymentRadios = document.querySelectorAll("input[name='paymentMethod']");
+      const cardFields = document.getElementById("card-fields");
+      const ccName = document.getElementById("cc-name");
+      const ccNumber = document.getElementById("cc-number");
+      const ccExp = document.getElementById("cc-expiration");
+      const ccCvv = document.getElementById("cc-cvv");
 
-paymentRadios.forEach(radio => {
-  radio.addEventListener("change", () => {
-    if (radio.value === "credit" || radio.value === "debit") {
-      cardFields.style.display = "flex";
-    } else {
-      cardFields.style.display = "none";
-    }
-  });
-});
+      function toggleCardRequired(show) {
+        ccName.required = show;
+        ccNumber.required = show;
+        ccExp.required = show;
+        ccCvv.required = show;
+      }
 
-// --- máscara para MM/AA ---
-const expInput = document.getElementById("cc-expiration");
-expInput.addEventListener("input", (e) => {
-  // deja solo dígitos
-  let value = e.target.value.replace(/\D/g, "");
+      // estado inicial según lo que se marcó en el server
+      const initialSelected = document.querySelector("input[name='paymentMethod']:checked");
+      if (initialSelected && (initialSelected.value === "credit" || initialSelected.value === "debit")) {
+        cardFields.style.display = "flex";
+        toggleCardRequired(true);
+      } else {
+        cardFields.style.display = "none";
+        toggleCardRequired(false);
+      }
 
-  // si ya hay más de 2 dígitos, mete la barra
-  if (value.length >= 3) {
-    value = value.slice(0, 2) + "/" + value.slice(2, 4);
-  }
+      paymentRadios.forEach(radio => {
+        radio.addEventListener("change", () => {
+          if (radio.value === "credit" || radio.value === "debit") {
+            cardFields.style.display = "flex";
+            toggleCardRequired(true);
+          } else {
+            cardFields.style.display = "none";
+            toggleCardRequired(false);
+          }
+        });
+      });
 
-  // limita a 5 chars total (MM/AA)
-  e.target.value = value.slice(0, 5);
-});
+      // --- máscara para MM/AA ---
+      const expInput = document.getElementById("cc-expiration");
+      expInput.addEventListener("input", (e) => {
+        let value = e.target.value.replace(/\D/g, "");
+        if (value.length >= 3) {
+          value = value.slice(0, 2) + "/" + value.slice(2, 4);
+        }
+        e.target.value = value.slice(0, 5);
+      });
 
-// --- solo números para CVV ---
-const cvvInput = document.getElementById("cc-cvv");
-cvvInput.addEventListener("input", (e) => {
-  // solo dígitos y máximo 4
-  e.target.value = e.target.value.replace(/\D/g, "").slice(0, 3);
-});
+      // --- solo números para CVV ---
+      const cvvInput = document.getElementById("cc-cvv");
+      cvvInput.addEventListener("input", (e) => {
+        e.target.value = e.target.value.replace(/\D/g, "").slice(0, 3);
+      });
 
-const cardInput = document.getElementById("cc-number");
-if (cardInput) {
-  cardInput.addEventListener("input", (e) => {
-    // solo dígitos
-    let value = e.target.value.replace(/\D/g, "").slice(0, 16);
+      // formato número de tarjeta
+      const cardInput = document.getElementById("cc-number");
+      if (cardInput) {
+        cardInput.addEventListener("input", (e) => {
+          let value = e.target.value.replace(/\D/g, "").slice(0, 16);
+          value = value.replace(/(.{4})/g, "$1 ").trim();
+          e.target.value = value;
+        });
+      }
 
-    value = value.replace(/(.{4})/g, "$1 ").trim();
-    e.target.value = value;
-  });
-}
+      // validación mínima en el cliente: fecha
+      const form = document.querySelector("form[action='/cars/<%= car.id %>/reserve']");
+      const dateInput = document.getElementById("dateRange");
 
-// validación del formulario en el lado del cliente
-const form = document.querySelector("form[action='/cars/<%= car.id %>/reserve']");
-const dateInput = document.getElementById("dateRange");
-
-if (form && dateInput) {
-  form.addEventListener("submit", (e) => {
-    if (!dateInput.value || dateInput.value.trim() === "") {
-      e.preventDefault();
-      alert("Debes seleccionar un rango de fechas.");
-      dateInput.focus();
-    }
-  });
-}
-
+      if (form && dateInput) {
+        form.addEventListener("submit", (e) => {
+          if (!dateInput.value || dateInput.value.trim() === "") {
+            e.preventDefault();
+            alert("Debes seleccionar un rango de fechas.");
+            dateInput.focus();
+          }
+        });
+      }
     </script>
 
   </body>
