@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Auto #<%= car.id %> · <%= car.brand %> <%= car.model %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/Assets/styles.css">
+  <style>
+    body { background:#f1f5f9; }
+    .wrap { max-width:1000px; margin:30px auto; display:grid; grid-template-columns: 1.2fr 1fr; gap:1rem; }
+    @media (max-width: 1000px) { .wrap { grid-template-columns: 1fr; } }
+    .card { background:#fff; border-radius:1rem; padding:1rem; box-shadow:0 10px 25px rgba(15,23,42,.05); }
+    .img { width:100%; height:280px; object-fit:cover; border-radius:.8rem; background:#f3f4f6; }
+    .title { margin:.25rem 0 .6rem; }
+    .row { margin:.35rem 0; }
+    .btn { display:inline-block; border:1px solid #111827; padding:.45rem .85rem; border-radius:.6rem; background:#fff; color:#111827; text-decoration:none; margin-right:.35rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <img class="img" src="<%= car.image_url && car.image_url !== '' ? car.image_url : '/Assets/Imgs/placeholder-car.jpg' %>" alt="">
+      <h2 class="title"><%= car.brand %> <%= car.model %> (<%= car.year %>)</h2>
+      <div class="row"><strong>Precio/día:</strong> $<%= Number(car.price_per_day || 0).toLocaleString('es-MX') %></div>
+      <div class="row"><strong>Estatus:</strong> <%= (car.status || 'available') %></div>
+      <div class="row"><strong>Carrocería:</strong> <%= car.body_type || '-' %></div>
+      <div class="row"><strong>Asientos:</strong> <%= car.seats || '-' %></div>
+      <div class="row"><strong>Descripción:</strong> <%= car.description || '-' %></div>
+    </div>
+    <div class="card">
+      <h3>Acciones rápidas</h3>
+      <div class="row" style="margin-top:.6rem;">
+        <a class="btn" href="/admin/autos/nuevo?clone=<%= car.id %>">Clonar (prefill)</a>
+        <form action="/admin/autos/clone/<%= car.id %>" method="POST" style="display:inline;">
+          <button type="submit" class="btn" style="cursor:pointer;">Duplicar</button>
+        </form>
+        <a class="btn" href="/admin/ventas?car_id=<%= car.id %>">Ver reservas</a>
+        <a class="btn" href="/autos">Volver a inventario</a>
+      </div>
+      <div class="row" style="margin-top:1rem;"><strong>Total de reservas:</strong> <%= reservas_total %></div>
+    </div>
+  </div>
+</body>
+</html>

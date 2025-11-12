@@ -43,9 +43,15 @@
         <a href="/#cat" class="btn btn-light btn-lg px-4 gap-3">
           Ver catálogo
         </a>
-        <a href="/" class="btn btn-outline-light btn-lg px-4">
-          Cotizar un auto
-        </a>
+        <a
+  href="https://wa.me/<%= whatsAppPhone %>?text=<%= waText %>"
+  target="_blank"
+  rel="noopener"
+  class="btn btn-outline-light btn-lg px-4"
+>
+  Cotizar un auto
+</a>
+
         </div>
       </div>
     </div>
@@ -174,7 +180,7 @@
 
       <div class="about-highlights">
         <div class="about-item"><span class="about-number">+120</span><span class="about-label">Autos publicados</span></div>
-        <div class="about-item"><span class="about-number">48h</span><span class="about-label">Tiempo de respuesta</span></div>
+        <div class="about-item"><span class="about-number">24h</span><span class="about-label">Tiempo de respuesta</span></div>
         <div class="about-item"><span class="about-number">100%</span><span class="about-label">Transparencia</span></div>
       </div>
     </div>
@@ -200,5 +206,7 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <%- include('partials/whatsapp-float') %>
+
 </body>
 </html>

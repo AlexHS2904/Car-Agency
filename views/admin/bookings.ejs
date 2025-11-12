@@ -1,235 +1,146 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Reservas / Ventas</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/Assets/styles.css">
-    <style>
-      .admin-layout {
-        display: flex;
-        min-height: 100vh;
-        background: #f1f5f9;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <title>Reservas / Ventas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/Assets/styles.css">
+  <style>
+    .admin-layout { display:flex; min-height:100vh; background:#f1f5f9; }
+    #adminSidebar { background:#0f172a; color:#fff; padding:1rem 1.25rem; display:flex; flex-direction:column; gap:1rem; min-width:230px; }
+    #adminSidebar .sidebar__brand { display:flex; gap:.5rem; align-items:center; font-weight:600; }
+    #adminSidebarNav { display:flex; flex-direction:column; gap:.4rem; }
+    #adminSidebarNav .sidebar__link { color:#e2e8f0; text-decoration:none; padding:.4rem .6rem; border-radius:.35rem; }
+    #adminSidebarNav .sidebar__link--active { background:rgba(255,255,255,.1); }
+    .main { flex:1; padding:1.5rem; }
 
-      /* sidebar aislada */
-      #adminSidebar {
-        background: #0f172a;
-        color: #fff;
-        padding: 1rem 1.25rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        min-width: 230px;
-      }
-      #adminSidebar .sidebar__brand {
-        display: flex;
-        gap: .5rem;
-        align-items: center;
-        font-weight: 600;
-      }
-      #adminSidebarNav {
-        display: flex;
-        flex-direction: column;
-        gap: .4rem;
-      }
-      #adminSidebarNav .sidebar__link {
-        color: #e2e8f0;
-        text-decoration: none;
-        padding: .4rem .6rem;
-        border-radius: .35rem;
-      }
-      #adminSidebarNav .sidebar__link--active {
-        background: rgba(255,255,255,.1);
-      }
+    .table-wrapper { background:#fff; border-radius:1.2rem; padding:1rem 1.2rem; overflow-x:auto; }
+    table.bookings-table { width:100%; border-collapse:collapse; min-width:980px; }
+    table.bookings-table th, table.bookings-table td { padding:.55rem .8rem; text-align:left; border-bottom:1px solid #eef0f2; font-size:.85rem; }
+    table.bookings-table th { font-weight:600; color:#172b4d; background:#f7f8fa; }
+    .status-pill { display:inline-block; padding:.25rem .6rem; border-radius:999px; font-size:.7rem; text-transform:capitalize; }
+    .status-confirmed { background:#dcffe4; color:#00662f; }
+    .status-cancelled { background:#ffe0e0; color:#831c1c; }
+    .status-pending   { background:#fff3cd; color:#664d03; }
 
-      /* contenido */
-      .main {
-        flex: 1;
-        padding: 1.5rem;
+    #adminSidebarToggle { display:none; }
+    @media (max-width:900px){
+      .admin-layout { flex-direction:column; }
+      #adminSidebar { width:100%; flex-direction:row; align-items:center; justify-content:space-between; position:relative; }
+      #adminSidebarToggle { display:inline-block; background:none; border:1px solid rgba(255,255,255,.3); color:#fff; border-radius:.4rem; padding:.25rem .5rem; font-size:.9rem; }
+      #adminSidebarNav { display:none; flex-direction:column; gap:.5rem; background:#0f172a; width:100%; position:absolute; top:100%; left:0; padding:.6rem .75rem .75rem; border-bottom-left-radius:.75rem; border-bottom-right-radius:.75rem; box-shadow:0 10px 25px rgba(15,23,42,.25); z-index:999; }
+      #adminSidebar.is-open #adminSidebarNav { display:flex !important; }
+      .main { padding:1rem; }
+    }
+  </style>
+</head>
+<body class="admin-layout">
+  <!-- Sidebar -->
+  <aside id="adminSidebar">
+    <div class="sidebar__brand">
+      <span class="sidebar__icon">🚗</span>
+      <span class="sidebar__title">Auto Dealer</span>
+    </div>
+    <button id="adminSidebarToggle" type="button">☰</button>
+    <nav id="adminSidebarNav">
+      <a href="/admin/dashboard" class="sidebar__link">Dashboard</a>
+      <a href="/autos" class="sidebar__link">Inventario</a>
+      <a href="/admin/ventas" class="sidebar__link sidebar__link--active">Ventas / Reservas</a>
+      <a href="/admin/autos/nuevo" class="sidebar__link">Publicar auto</a>
+      <a href="/" class="sidebar__link sidebar__link--secondary" target="_blank">Ver sitio</a>
+    </nav>
+  </aside>
+
+  <!-- Contenido -->
+  <main class="main">
+    <header class="main__header">
+      <h1 class="main__title">Reservas / Bookings</h1>
+    </header>
+
+    <%
+      function fechaBonita(d) {
+        if (!d) return "";
+        let iso;
+        if (d.toISOString) { iso = d.toISOString().slice(0,10); }
+        else { iso = new Date(d).toISOString().slice(0,10); }
+        const [y,m,day] = iso.split("-");
+        const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+        return Number(day) + " de " + meses[Number(m)-1] + " de " + y;
       }
+    %>
 
-      .table-wrapper {
-        background: #fff;
-        border-radius: 1.2rem;
-        padding: 1rem 1.2rem;
-        overflow-x: auto;
-      }
-      table.bookings-table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 900px;
-      }
-      table.bookings-table th,
-      table.bookings-table td {
-        padding: .55rem .8rem;
-        text-align: left;
-        border-bottom: 1px solid #eef0f2;
-        font-size: .85rem;
-      }
-      table.bookings-table th {
-        font-weight: 600;
-        color: #172b4d;
-        background: #f7f8fa;
-      }
-      .status-pill {
-        display: inline-block;
-        padding: .25rem .6rem;
-        border-radius: 999px;
-        font-size: .7rem;
-        text-transform: capitalize;
-      }
-      .status-confirmed { background: #dcffe4; color: #00662f; }
-      .status-cancelled { background: #ffe0e0; color: #831c1c; }
-      .status-pending { background: #fff3cd; color: #664d03; }
-
-      /* botón hamburguesa oculto en desktop */
-      #adminSidebarToggle {
-        display: none;
-      }
-
-      @media (max-width: 900px) {
-        .admin-layout {
-          flex-direction: column;
-        }
-
-        #adminSidebar {
-          width: 100%;
-          flex-direction: row;
-          align-items: center;
-          justify-content: space-between;
-          position: relative;
-        }
-
-        #adminSidebarToggle {
-          display: inline-block;
-          background: none;
-          border: 1px solid rgba(255,255,255,.3);
-          color: #fff;
-          border-radius: .4rem;
-          padding: .25rem .5rem;
-          font-size: .9rem;
-        }
-
-        /* oculto por defecto en mobile */
-        #adminSidebarNav {
-          display: none;
-          flex-direction: column;
-          gap: .5rem;
-          background: #0f172a;
-          width: 100%;
-          position: absolute;
-          top: 100%;
-          left: 0;
-          padding: .6rem .75rem .75rem;
-          border-bottom-left-radius: .75rem;
-          border-bottom-right-radius: .75rem;
-          box-shadow: 0 10px 25px rgba(15,23,42,.25);
-          z-index: 999;
-        }
-
-        /* cuando el aside tenga la clase, mostrar */
-        #adminSidebar.is-open #adminSidebarNav {
-          display: flex !important;
-        }
-
-        .main {
-          padding: 1rem;
-        }
-      }
-    </style>
-  </head>
-
-  <body class="admin-layout">
-    <!-- Sidebar -->
-    <aside id="adminSidebar">
-      <div class="sidebar__brand">
-        <span class="sidebar__icon">🚗</span>
-        <span class="sidebar__title">Auto Dealer</span>
-      </div>
-      <button id="adminSidebarToggle" type="button">☰</button>
-      <nav id="adminSidebarNav">
-        <a href="/admin/dashboard" class="sidebar__link">Dashboard</a>
-        <a href="/autos" class="sidebar__link">Inventario</a>
-        <a href="/admin/ventas" class="sidebar__link sidebar__link--active">Ventas / Reservas</a>
-        <a href="/admin/autos/nuevo" class="sidebar__link">Publicar auto</a>
-        <a href="/" class="sidebar__link sidebar__link--secondary" target="_blank">Ver sitio</a>
-      </nav>
-    </aside>
-
-    <!-- Contenido -->
-    <main class="main">
-      <header class="main__header">
-        <h1 class="main__title">Reservas / Bookings</h1>
-      </header>
-
-      <% 
-        function fechaBonita(d) {
-          if (!d) return "";
-          let iso;
-          if (d.toISOString) {
-            iso = d.toISOString().slice(0,10);
-          } else {
-            iso = d.toString().slice(0,10);
-          }
-          const [y,m,day] = iso.split("-");
-          const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-          return Number(day) + " de " + meses[Number(m)-1] + " de " + y;
-        }
-      %>
-
-      <% if (!reservas || reservas.length === 0) { %>
-        <p class="empty">No hay reservas registradas.</p>
-      <% } else { %>
-        <div class="table-wrapper">
-          <table class="bookings-table">
-            <thead>
+    <% if (!reservas || reservas.length === 0) { %>
+      <p class="empty">No hay reservas registradas.</p>
+    <% } else { %>
+      <div class="table-wrapper">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Creación</th>
+              <th>Cliente</th>
+              <th>Auto</th>
+              <th>Del</th>
+              <th>Al</th>
+              <th>Estatus</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% reservas.forEach(r => { %>
               <tr>
-                <th>#</th>
-                <th>Creación</th>
-                <th>Cliente</th>
-                <th>Auto</th>
-                <th>Del</th>
-                <th>Al</th>
-                <th>Estatus</th>
-                <th>Total</th>
+                <td><%= r.id %></td>
+                <td><%= fechaBonita(r.created_at) %></td>
+                <td>
+                  <strong><%= r.user_name %></strong><br>
+                  <small><%= r.user_email %></small>
+                </td>
+                <td>
+                  <%= r.brand %> <%= r.model %>
+                  <% if (typeof car_id !== 'undefined' && car_id) { %>
+                    <div style="font-size:.7rem;color:#64748b;">Auto #<%= r.car_id %></div>
+                  <% } %>
+                </td>
+                <td><%= fechaBonita(r.start_date) %></td>
+                <td><%= fechaBonita(r.end_date) %></td>
+                <td><span class="status-pill status-<%= r.status %>"><%= r.status %></span></td>
+                <td>$<%= Number(r.total_amount ?? 0).toLocaleString('es-MX') %></td>
+                <td style="white-space:nowrap;">
+                  <a
+                    href="/admin/reservas/<%= r.id %>/editar<%= car_id ? ('?return_to=' + encodeURIComponent('/admin/ventas?car_id=' + car_id)) : '' %>"
+                    style="border:1px solid #e5e7eb;padding:.2rem .5rem;border-radius:.45rem;text-decoration:none;color:#111827;background:#fff;font-size:.8rem;margin-right:.25rem;"
+                  >Editar</a>
+
+                  <form
+                    action="/admin/reservas/<%= r.id %>/eliminar"
+                    method="POST"
+                    style="display:inline"
+                    onsubmit="return confirm('¿Eliminar la reserva #<%= r.id %>? Esta acción no se puede deshacer.');"
+                  >
+                    <input type="hidden" name="return_to" value="<%= car_id ? '/admin/ventas?car_id=' + car_id : '/admin/ventas' %>">
+                    <button
+                      type="submit"
+                      style="border:1px solid #e5e7eb;padding:.2rem .5rem;border-radius:.45rem;background:#fff;color:#e11d48;font-size:.8rem;"
+                    >Eliminar</button>
+                  </form>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              <% reservas.forEach(r => { %>
-                <tr>
-                  <td><%= r.id %></td>
-                  <td><%= fechaBonita(r.created_at) %></td>
-                  <td>
-                    <strong><%= r.user_name %></strong><br>
-                    <small><%= r.user_email %></small>
-                  </td>
-                  <td><%= r.brand %> <%= r.model %></td>
-                  <td><%= fechaBonita(r.start_date) %></td>
-                  <td><%= fechaBonita(r.end_date) %></td>
-                  <td>
-                    <span class="status-pill status-<%= r.status %>"><%= r.status %></span>
-                  </td>
-                  <td>
-                    $<%= Number(r.total_amount ?? 0).toLocaleString('es-MX') %>
-                  </td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
-      <% } %>
-    </main>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </main>
 
-    <script>
-      const adminBtn = document.getElementById('adminSidebarToggle');
-      const adminSidebar = document.getElementById('adminSidebar');
-
-      if (adminBtn && adminSidebar) {
-        adminBtn.addEventListener('click', () => {
-          adminSidebar.classList.toggle('is-open');
-        });
-      }
-    </script>
-  </body>
+  <script>
+    const adminBtn = document.getElementById('adminSidebarToggle');
+    const adminSidebar = document.getElementById('adminSidebar');
+    if (adminBtn && adminSidebar) {
+      adminBtn.addEventListener('click', () => {
+        adminSidebar.classList.toggle('is-open');
+      });
+    }
+  </script>
+</body>
 </html>

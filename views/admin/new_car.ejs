@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Publicar auto</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/Assets/styles.css" />
+    <style>
+      /* ====== LAYOUT + SIDEBAR (igual que admin) ====== */
+      .admin-layout { display:flex; min-height:100vh; background:#f1f5f9; }
+
+      #adminSidebar{
+        background:#0f172a; color:#fff; padding:1rem 1.25rem;
+        display:flex; flex-direction:column; gap:1rem; min-width:230px;
+      }
+      #adminSidebar .admin-sidebar__brand{ display:flex; gap:.5rem; align-items:center; font-weight:600; }
+      #adminSidebarNav{ display:flex; flex-direction:column; gap:.4rem; }
+      #adminSidebarNav .admin-sidebar__link{
+        color:#e2e8f0; text-decoration:none; padding:.4rem .6rem; border-radius:.35rem;
+      }
+      #adminSidebarNav .admin-sidebar__link--active{ background:rgba(255,255,255,.1); }
+      #adminSidebarToggle{ display:none; }
+
+      .main{ flex:1; padding:1.5rem; }
+      .shell{
+        max-width:950px; margin:0 auto; background:#fff; border-radius:1rem;
+        padding:1rem 1.2rem; box-shadow:0 10px 25px rgba(15,23,42,.05);
+      }
+
+      /* ====== FORM ====== */
+      h2{ margin:.2rem 0 1rem; font-weight:600; }
+      .row{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+      @media (max-width:900px){ .row{ grid-template-columns:1fr; } }
+
+      label{ font-weight:400; margin:.25rem 0; display:block; } /* sin negritas */
+      input,select,textarea{
+        width:100%; padding:.55rem .7rem; border:1px solid #e5e7eb; border-radius:.5rem; background:#fff;
+      }
+      .preview{
+        margin-top:.5rem; width:100%; height:200px; background:#f3f4f6;
+        border:1px dashed #d1d5db; border-radius:.8rem; display:flex; align-items:center; justify-content:center; overflow:hidden;
+      }
+      .preview img{ width:100%; height:100%; object-fit:cover; }
+      .alert{ background:#fee2e2; border:1px solid #fecaca; color:#7f1d1d; padding:.6rem .8rem; border-radius:.6rem; margin-bottom:.8rem; }
+      .btn{ display:inline-block; border:1px solid #111827; padding:.5rem .9rem; border-radius:.6rem; background:#fff; color:#111827; text-decoration:none; }
+
+      /* ====== Responsive menú ====== */
+      @media (max-width:900px){
+        .admin-layout{ flex-direction:column; }
+        #adminSidebar{
+          width:100%; flex-direction:row; align-items:center; justify-content:space-between; position:relative;
+        }
+        #adminSidebarToggle{
+          display:inline-block; background:none; border:1px solid rgba(255,255,255,.3);
+          color:#fff; border-radius:.4rem; padding:.25rem .5rem; font-size:.9rem;
+        }
+        #adminSidebarNav{
+          display:none; flex-direction:column; gap:.5rem; background:#0f172a; width:100%;
+          position:absolute; top:100%; left:0; padding:.6rem .75rem .75rem;
+          border-bottom-left-radius:.75rem; border-bottom-right-radius:.75rem;
+          box-shadow:0 10px 25px rgba(15,23,42,.25); z-index:999;
+        }
+        #adminSidebar.is-open #adminSidebarNav{ display:flex !important; }
+      }
+    </style>
+  </head>
+  <body class="admin-layout">
+    <!-- Sidebar -->
+    <aside id="adminSidebar">
+      <div class="admin-sidebar__brand">
+        <span class="admin-sidebar__icon">🚗</span>
+        <span class="admin-sidebar__title">Auto Dealer</span>
+      </div>
+      <button id="adminSidebarToggle" type="button">☰</button>
+      <nav id="adminSidebarNav">
+        <a href="/admin/dashboard" class="admin-sidebar__link">Dashboard</a>
+        <a href="/autos" class="admin-sidebar__link">Inventario</a>
+        <a href="/admin/ventas" class="admin-sidebar__link">Ventas / Reservas</a>
+        <a href="/admin/autos/nuevo" class="admin-sidebar__link admin-sidebar__link--active">Publicar auto</a>
+        <a href="/" class="admin-sidebar__link" target="_blank">Ver sitio</a>
+      </nav>
+    </aside>
+
+    <!-- Contenido -->
+    <main class="main">
+      <div class="shell">
+        <h2>Publicar nuevo auto</h2>
+
+        <% if (error) { %>
+          <div class="alert"><%= error %></div>
+        <% } %>
+
+        <form action="/admin/autos/nuevo" method="POST" enctype="multipart/form-data">
+          <div class="row">
+            <div>
+              <label>Marca</label>
+              <input type="text" name="brand" placeholder="Ej. Audi"
+                     value="<%= preset && preset.brand ? preset.brand : '' %>" required>
+
+              <label style="margin-top:.6rem;">Modelo</label>
+              <input type="text" name="model" placeholder="Ej. Q5"
+                     value="<%= preset && preset.model ? preset.model : '' %>" required>
+
+              <label style="margin-top:.6rem;">Año</label>
+              <select name="year" required>
+                <% for (let y = 2026; y >= 1980; y--) { %>
+                  <option value="<%= y %>" <%= (preset && Number(preset.year)===y) ? 'selected' : '' %>><%= y %></option>
+                <% } %>
+              </select>
+
+              <label style="margin-top:.6rem;">Precio por día (MXN)</label>
+              <input type="number" name="price_per_day" min="0" step="100"
+                     value="<%= preset && preset.price_per_day ? preset.price_per_day : '' %>" required>
+
+              <label style="margin-top:.6rem;">Asientos</label>
+              <input type="number" name="seats" min="1" max="9" step="1" placeholder="Ej. 5"
+                     value="<%= preset && preset.seats ? preset.seats : '' %>">
+            </div>
+
+            <div>
+              <label>Tipo de carrocería</label>
+              <select name="body_type">
+                <option value="">-- Selecciona --</option>
+                <option value="sedan"     <%= preset && preset.body_type==='sedan' ? 'selected' : '' %>>Sedán</option>
+                <option value="hatchback" <%= preset && preset.body_type==='hatchback' ? 'selected' : '' %>>Hatchback</option>
+                <option value="suv"       <%= preset && preset.body_type==='suv' ? 'selected' : '' %>>SUV / Camioneta</option>
+                <option value="pickup"    <%= preset && preset.body_type==='pickup' ? 'selected' : '' %>>Pickup</option>
+                <option value="luxury"    <%= preset && preset.body_type==='luxury' ? 'selected' : '' %>>Lujo</option>
+              </select>
+
+              <label style="margin-top:.6rem;">URL de la imagen (o sube un archivo)</label>
+              <input
+                type="text" id="image_url" name="image_url" placeholder="https://... o /uploads/archivo.jpg"
+                value="<%= preset && preset.image_url ? preset.image_url : '' %>"
+                oninput="previewFromUrl(this.value)"
+              >
+
+              <label style="margin-top:.6rem;">Subir imagen</label>
+              <input type="file" id="image" name="image" accept="image/*" onchange="previewFromFile(this)">
+
+              <div class="preview" id="previewBox">
+                <span class="text-muted">Sin imagen</span>
+              </div>
+            </div>
+          </div>
+
+          <label style="margin-top:.8rem;">Descripción</label>
+          <textarea name="description" rows="3" placeholder="Detalles del auto, transmisión, kilometraje, etc."><%= preset && preset.description ? preset.description : '' %></textarea>
+
+          <div style="margin-top:1rem; display:flex; gap:.5rem; flex-wrap:wrap;">
+            <button type="submit" class="btn">Guardar</button>
+            <a href="/autos" class="btn">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      // toggle sidebar
+      const adminBtn = document.getElementById('adminSidebarToggle');
+      const adminSidebar = document.getElementById('adminSidebar');
+      if (adminBtn && adminSidebar){
+        adminBtn.addEventListener('click', ()=> adminSidebar.classList.toggle('is-open'));
+      }
+
+      // preview helpers
+      function setPreview(src){
+        const box = document.getElementById("previewBox");
+        if(!box) return;
+        box.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = src;
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
+        box.appendChild(img);
+      }
+      function previewFromUrl(val){
+        if(!val){
+          const box = document.getElementById("previewBox");
+          if (box) box.innerHTML = '<span class="text-muted">Sin imagen</span>';
+          return;
+        }
+        setPreview(val);
+      }
+      function previewFromFile(input){
+        if(!input.files || !input.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = (e)=> setPreview(e.target.result);
+        reader.readAsDataURL(input.files[0]);
+      }
+      (function initPresetPreview(){
+        const url = "<%= preset && preset.image_url ? preset.image_url : '' %>";
+        if(url) setPreview(url);
+      })();
+    </script>
+  </body>
+</html>

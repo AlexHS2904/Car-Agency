@@ -229,6 +229,82 @@
           </ul>
         <% } %>
       </section>
+
+<%
+  // declarar una sola vez si no lo tienes ya
+  function fechaBonita(d) {
+    if (!d) return "";
+    let iso;
+    if (d.toISOString) {
+      iso = d.toISOString().slice(0,10);
+    } else {
+      iso = d.toString().slice(0,10);
+    }
+    const [y,m,day] = iso.split("-");
+    const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    return Number(day) + " de " + meses[Number(m)-1] + " de " + y;
+  }
+%>
+
+<section class="panel" style="margin-top:1rem;">
+  <div class="panel__header">
+    <h2>Inventario (Top 10)</h2>
+    <a href="/autos" class="btn btn--primary d-inline-flex d-md-none">Ver inventario completo</a>
+  </div>
+
+  <% if (!inventory || inventory.length === 0) { %>
+    <p class="empty">No hay autos en inventario.</p>
+  <% } else { %>
+    <div class="table-wrapper" style="overflow-x:auto;">
+      <table class="inventory-table" style="width:100%; border-collapse:collapse; min-width:980px;">
+        <thead>
+          <tr style="background:#f7f8fa;">
+            <th style="text-align:left; padding:.55rem .8rem;">Auto</th>
+            <th style="text-align:left; padding:.55rem .8rem;">Año</th>
+            <th style="text-align:left; padding:.55rem .8rem;">Precio/día</th>
+            <th style="text-align:left; padding:.55rem .8rem;">Estatus</th>
+            <th style="text-align:left; padding:.55rem .8rem;"># Reservas</th>
+            <th style="text-align:left; padding:.55rem .8rem;">Alta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% inventory.forEach(car => { 
+            const s = (car.status || 'available').toLowerCase();
+            const pillClass =
+              s === 'sold' ? 'invpill-sold' :
+              (s === 'reserved' ? 'invpill-reserved' :
+              (s === 'publicado' || s === 'available') ? 'invpill-available' : 'invpill-secondary');
+          %>
+            <tr style="border-bottom:1px solid #eef0f2;">
+              <td style="padding:.55rem .8rem; display:flex; align-items:center; gap:.6rem;">
+                <img
+                  src="<%= car.image_url && car.image_url !== '' ? car.image_url : '/Assets/Imgs/placeholder-car.jpg' %>"
+                  alt=""
+                  style="width:52px; height:36px; object-fit:cover; border-radius:.35rem; box-shadow:0 4px 12px rgba(0,0,0,.06);"
+                />
+                <div>
+                  <div style="font-weight:600;"><%= car.brand %> <%= car.model %></div>
+                  <div style="font-size:.75rem; color:#64748b;">ID #<%= car.id %></div>
+                </div>
+              </td>
+              <td style="padding:.55rem .8rem;"><%= car.year %></td>
+              <td style="padding:.55rem .8rem;">$<%= Number(car.price_per_day || 0).toLocaleString('es-MX') %></td>
+              <td style="padding:.55rem .8rem;">
+                <span class="invpill <%= pillClass %>" style="display:inline-block;padding:.25rem .6rem;border-radius:999px;font-size:.7rem;text-transform:capitalize;">
+                  <%= s %>
+                </span>
+              </td>
+              <td style="padding:.55rem .8rem;"><%= car.reservas_total %></td>
+              <td style="padding:.55rem .8rem;"><%= fechaBonita(car.created_at) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+
     </main>
 
     <script>
@@ -243,3 +319,4 @@
     </script>
   </body>
 </html>
+

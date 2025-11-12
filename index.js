@@ -37,6 +37,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// en app.js, después de configurar views/sessions/etc.
+app.locals.whatsAppPhone = process.env.WHATSAPP_PHONE || "2213987353";
+app.locals.waText = encodeURIComponent("Hola, me gustaría cotizar un auto. ¿Puedes ayudarme?");
+app.use((req, res, next) => {
+  res.locals.currentPath = req.path || "";
+  next();
+});
+
+
 // --- helpers de seguridad ---
 function ensureLogged(req, res, next) {
   if (!req.session.user) {
@@ -75,12 +84,20 @@ app.get("/", async (req, res) => {
        LIMIT 13`
     );
 
-    res.render("index", { miniCars });
+    const whatsAppPhone = process.env.WHATSAPP_PHONE || "2213987353";
+    const waText = encodeURIComponent("Hola, me gustaría cotizar un auto. ¿Puedes ayudarme?");
+
+    res.render("index", { miniCars, whatsAppPhone, waText });
   } catch (err) {
     console.error("Error cargando mini carrusel:", err);
-    res.render("index", { miniCars: [] });
+
+    const whatsAppPhone = process.env.WHATSAPP_PHONE || "2213987353";
+    const waText = encodeURIComponent("Hola, me gustaría cotizar un auto. ¿Puedes ayudarme?");
+
+    res.render("index", { miniCars: [], whatsAppPhone, waText });
   }
 });
+
 
 // LOGIN (GET)
 app.get("/login", (req, res) => {

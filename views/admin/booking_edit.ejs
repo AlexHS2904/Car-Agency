@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editar reserva #<%= r.id %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/Assets/styles.css">
+  <style>
+    body { background:#f1f5f9; }
+    .wrap { max-width:900px; margin:40px auto; background:#fff; border-radius:1rem; padding:1.2rem 1.4rem; box-shadow:0 10px 25px rgba(15,23,42,.05); }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:1rem; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    label { font-weight: 600; margin-bottom:.25rem; display:block; }
+    input, select { width:100%; padding:.55rem .7rem; border:1px solid #e5e7eb; border-radius:.5rem; }
+    .row { margin-bottom:.8rem; }
+    .btn { display:inline-block; border:1px solid #111827; padding:.5rem .9rem; border-radius:.6rem; background:#fff; color:#111827; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2 style="margin-top:0;">Editar reserva #<%= r.id %></h2>
+
+    <% if (error) { %>
+      <div style="background:#fee2e2;border:1px solid #fecaca;padding:.6rem .8rem;border-radius:.6rem;margin-bottom:.8rem;color:#7f1d1d;">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <p style="margin-top:.2rem;color:#64748b;">
+      <strong>Cliente:</strong> <%= r.user_name %> &lt;<%= r.user_email %>&gt; ·
+      <strong>Auto:</strong> <%= r.brand %> <%= r.model %> (ID <%= r.car_id %>)
+    </p>
+
+    <form action="/admin/reservas/<%= r.id %>/editar" method="POST">
+      <div class="grid">
+        <div class="row">
+          <label>Inicio</label>
+          <input type="date" name="start_date" value="<%= (new Date(r.start_date)).toISOString().slice(0,10) %>" required>
+        </div>
+        <div class="row">
+          <label>Fin</label>
+          <input type="date" name="end_date" value="<%= (new Date(r.end_date)).toISOString().slice(0,10) %>" required>
+        </div>
+        <div class="row">
+          <label>Estatus</label>
+          <select name="status" required>
+            <option value="pending"   <%= r.status === 'pending' ? 'selected' : '' %>>pending</option>
+            <option value="confirmed" <%= r.status === 'confirmed' ? 'selected' : '' %>>confirmed</option>
+            <option value="cancelled" <%= r.status === 'cancelled' ? 'selected' : '' %>>cancelled</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>Total (MXN)</label>
+          <input type="number" step="0.01" name="total_amount" value="<%= Number(r.total_amount || 0).toFixed(2) %>" required>
+        </div>
+      </div>
+
+      <input type="hidden" name="return_to" value="<%= typeof return_to !== 'undefined' ? return_to : '' %>">
+
+      <div style="margin-top:1rem; display:flex; gap:.5rem; flex-wrap:wrap;">
+        <button type="submit" class="btn">Guardar</button>
+        <a href="<%= (typeof return_to !== 'undefined' && return_to) ? return_to : '/admin/ventas' %>" class="btn">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

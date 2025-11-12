@@ -1,0 +1,49 @@
+<% if (!currentPath.startsWith('/admin')) { %>
+  <a
+    href="https://wa.me/<%= whatsAppPhone %>?text=<%= waText %>"
+    class="wa-float"
+    target="_blank"
+    rel="noopener"
+    aria-label="Atención personalizada por WhatsApp"
+    title="¿Necesitas ayuda? Escríbenos por WhatsApp"
+  >
+    <img src="/Assets/Imgs/ventas.svg" alt="" class="wa-icon" aria-hidden="true" />
+  </a>
+
+  <!-- Globito de invitación SIEMPRE visible al entrar -->
+  <div class="wa-hint" role="dialog" aria-label="Atención personalizada por WhatsApp" hidden>
+    <button class="wa-hint-close" type="button" aria-label="Cerrar">×</button>
+    ¿Necesitas atención personalizada? <b>Da click aquí</b> 👇
+  </div>
+
+  <script>
+    (function () {
+      const hint = document.querySelector('.wa-hint');
+      if (!hint) return;
+
+      const AUTO_HIDE_MS = 10000; // 10s visible
+      let hideTimer;
+
+      function show() {
+        hint.hidden = false;
+        requestAnimationFrame(() => hint.classList.add('show'));
+        hideTimer = setTimeout(hide, AUTO_HIDE_MS);
+      }
+
+      function hide() {
+        hint.classList.remove('show');
+        setTimeout(() => hint.hidden = true, 300);
+        if (hideTimer) clearTimeout(hideTimer);
+      }
+
+      // Mostrar inmediatamente al cargar
+      show();
+
+      // Cerrar con la X
+      hint.querySelector('.wa-hint-close')?.addEventListener('click', hide);
+
+      // Opcional: cerrar con ESC
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide(); });
+    })();
+  </script>
+<% } %>
