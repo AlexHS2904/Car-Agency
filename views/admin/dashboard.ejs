@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="/Assets/styles.css">
   </head>
 
-
   <body class="admin-layout">
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -18,7 +17,8 @@
         <a href="/admin/dashboard" class="sidebar__link sidebar__link--active">Dashboard</a>
         <a href="/autos" class="sidebar__link">Inventario</a>
         <a href="/ventas" class="sidebar__link">Ventas</a>
-        <a href="/autos/nuevo" class="sidebar__link">Publicar auto</a>
+        <!-- IMPORTANTE: aquí va /admin/... -->
+        <a href="/admin/autos/nuevo" class="sidebar__link">Publicar auto</a>
         <a href="/" class="sidebar__link sidebar__link--secondary" target="_blank"> Ver sitio</a>
       </nav>
     </aside>
@@ -27,7 +27,8 @@
     <main class="main">
       <header class="main__header">
         <h1 class="main__title">Dashboard</h1>
-        <a href="/autos/nuevo" class="btn btn--primary">+ Nuevo auto</a>
+        <!-- IMPORTANTE: aquí también -->
+        <a href="/admin/autos/nuevo" class="btn btn--primary">+ Nuevo auto</a>
       </header>
 
       <section class="cards_admin">
@@ -56,7 +57,13 @@
         <% if (movimientos.length === 0) { %>
           <p class="empty">No hay ventas recientes.</p>
         <% } else { %>
-          <!-- tabla aquí -->
+          <ul>
+            <% movimientos.forEach(m => { %>
+              <li>
+                Venta #<%= m.id %> - <%= m.cliente_nombre || 'Cliente' %> - <%= m.fecha_venta %>
+              </li>
+            <% }) %>
+          </ul>
         <% } %>
       </section>
     </main>

@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 import pool from "./db.js";
 import adminRoutes from "./routes/admin.js";
 import reservationsRoutes from "./routes/reservations.js";
+import autosRoutes from "./routes/autos.js";
 
 const app = express();
 
@@ -142,8 +143,8 @@ app.get("/register", (req, res) => {
 app.post("/register", async (req, res) => {
   const { name, email, phone, password, confirmPassword } = req.body;
 
-  // 1. validaciones básicas
   const formData = { name, email, phone };
+
   if (!name || !email || !password || !confirmPassword) {
     return res.status(400).render("register", {
       error: "Todos los campos obligatorios deben llenarse.",
@@ -159,7 +160,6 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    // 2. ¿ya existe ese correo?
     const [byEmail] = await pool.query(
       "SELECT id FROM users WHERE email = ?",
       [email]
@@ -182,13 +182,11 @@ app.post("/register", async (req, res) => {
       });
     }
 
-    // 4. crear usuario
     const [result] = await pool.query(
       "INSERT INTO users (name, email, phone, password, role_id) VALUES (?, ?, ?, ?, ?)",
       [name, email, phone || null, password, 2] // 2 = usuario normal
     );
 
-    // 5. iniciar sesión automático
     req.session.user = {
       id: result.insertId,
       email,
@@ -205,7 +203,6 @@ app.post("/register", async (req, res) => {
     });
   }
 });
-
 
 // CATÁLOGO
 app.get("/catalogo", async (req, res) => {
@@ -257,10 +254,12 @@ app.post("/logout", (req, res) => {
    RUTAS PROTEGIDAS / MODULARES
    ========================= */
 
-// admin primero
+app.use("/", autosRoutes);
+
+// admin primero (aquí va /admin/autos/nuevo)
 app.use("/admin", ensureAdmin, adminRoutes);
 
-// (que adentro tienen ensureLogged en lo que corresponde)
+// tus rutas de reservas
 app.use("/", reservationsRoutes);
 
 // ADMIN directo
