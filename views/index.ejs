@@ -95,51 +95,59 @@
       <div class="mini-carousel-track" id="miniCarouselTrack">
 
         <% if (miniCars && miniCars.length > 0) { %>
-          <% miniCars.forEach(car => { %>
-            <div class="mini-carousel-card car-card">
-              <img
-                src="<%= car.image_url && car.image_url !== '' ? car.image_url : '/Assets/Imgs/placeholder-car.jpg' %>"
-                alt="<%= car.brand %> <%= car.model %>"
-              >
-              <div class="p-3">
-                <h5 class="mb-1"><%= car.brand %> <%= car.model %></h5>
+  <% miniCars.forEach(car => { %>
+    <div class="mini-carousel-card car-card">
+      <img
+        src="<%= car.image_url && car.image_url !== '' ? car.image_url : '/Assets/Imgs/placeholder-car.jpg' %>"
+        alt="<%= car.brand %> <%= car.model %>"
+      >
+      <div class="p-3">
+        <h5 class="mb-1"><%= car.brand %> <%= car.model %></h5>
 
-                <% if (car.body_type) { %>
-                  <p class="mb-2">
-                    <span class="badge bg-light text-dark">
-                      <%= car.body_type.toUpperCase() %>
-                    </span>
-                  </p>
-                <% } %>
-
-                <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
-                  <span class="d-flex align-items-center gap-1">
-                    <img class="icon" src="/Assets/Imgs/person.svg" alt="person">
-                    <%= car.seats || 5 %> pax
-                  </span>
-                  <span><%= car.year %></span>
-                </div>
-
-                <p class="fw-semibold mb-3" style="font-size: 1.05rem;">
-                  $<%= Number(car.price_per_day).toLocaleString('es-MX') %> MXN/día
-                </p>
-
-                <% if (currentUser) { %>
-                  <a href="/cars/<%= car.id %>/reserve" class="btn btn-sm btn-outline-dark w-100">
-                    Rentar
-                  </a>
-                <% } else { %>
-                  <a href="/login?returnTo=/cars/<%= car.id %>/reserve" class="btn btn-sm btn-outline-dark w-100">
-                    Rentar
-                  </a>
-                <% } %>
-              </div>
-            </div>
-          <% }) %>
-        <% } else { %>
-          <p>No hay autos disponibles por ahora.</p>
+        <% 
+          const t = car.body_type ? car.body_type.toLowerCase() : null;
+          let label = "";
+          if (t === "sedan") label = "Sedán";
+          else if (t === "hatchback") label = "Hatchback";
+          else if (t === "suv") label = "SUV / Camioneta";
+          else if (t === "pickup") label = "Pickup";
+          else if (t) label = t.charAt(0).toUpperCase() + t.slice(1);
+        %>
+        <% if (label) { %>
+          <p class="mb-2">
+            <span class="badge bg-light text-dark">
+              <%= label %>
+            </span>
+          </p>
         <% } %>
 
+        <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
+          <span class="d-flex align-items-center gap-1">
+            <img class="icon" src="/Assets/Imgs/person.svg" alt="person">
+            <%= car.seats || 5 %> pax
+          </span>
+          <span><%= car.year %></span>
+        </div>
+
+        <p class="fw-semibold mb-3" style="font-size: 1.05rem;">
+          $<%= Number(car.price_per_day).toLocaleString('es-MX') %> MXN/día
+        </p>
+
+        <% if (currentUser) { %>
+          <a href="/cars/<%= car.id %>/reserve" class="btn btn-sm btn-outline-dark w-100">
+            Rentar
+          </a>
+        <% } else { %>
+          <a href="/login?returnTo=/cars/<%= car.id %>/reserve" class="btn btn-sm btn-outline-dark w-100">
+            Rentar
+          </a>
+        <% } %>
+      </div>
+    </div>
+  <% }) %>
+<% } else { %>
+  <p>No hay autos disponibles por ahora.</p>
+<% } %>
       </div>
     </div>
 

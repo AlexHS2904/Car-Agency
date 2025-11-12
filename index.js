@@ -60,9 +60,17 @@ function ensureAdmin(req, res, next) {
 app.get("/", async (req, res) => {
   try {
     const [miniCars] = await pool.query(
-      `SELECT id, brand, model, year, price_per_day, image_url
+      `SELECT
+         id,
+         brand,
+         model,
+         year,
+         price_per_day,
+         image_url,
+         body_type,
+         seats
        FROM cars
-       WHERE status = 'available'
+       WHERE status IN ('available','publicado')
        ORDER BY RAND()
        LIMIT 13`
     );
@@ -114,12 +122,10 @@ app.post("/login", async (req, res) => {
       role: user.role,
     };
 
-    // si venías de una página, ve ahí
     if (returnTo && returnTo.trim() !== "") {
       return res.redirect(returnTo);
     }
 
-    // si no, lo de siempre
     if (user.role === "admin") {
       return res.redirect("/admin/dashboard");
     } else {
@@ -142,7 +148,6 @@ app.get("/register", (req, res) => {
 // REGISTER (POST)
 app.post("/register", async (req, res) => {
   const { name, email, phone, password, confirmPassword } = req.body;
-
   const formData = { name, email, phone };
 
   if (!name || !email || !password || !confirmPassword) {
@@ -184,7 +189,7 @@ app.post("/register", async (req, res) => {
 
     const [result] = await pool.query(
       "INSERT INTO users (name, email, phone, password, role_id) VALUES (?, ?, ?, ?, ?)",
-      [name, email, phone || null, password, 2] // 2 = usuario normal
+      [name, email, phone || null, password, 2]
     );
 
     req.session.user = {
@@ -208,7 +213,7 @@ app.post("/register", async (req, res) => {
 app.get("/catalogo", async (req, res) => {
   const { year, tipo, max_price } = req.query;
 
-  let query = "SELECT * FROM cars WHERE status = 'available'";
+  let query = "SELECT * FROM cars WHERE status IN ('available','publicado')";
   const params = [];
 
   if (year && year !== "") {
@@ -254,13 +259,14 @@ app.post("/logout", (req, res) => {
    RUTAS PROTEGIDAS / MODULARES
    ========================= */
 
+// 1) primero reservas para que /mis_reservas no lo pisen otras rutas
+app.use("/", reservationsRoutes);
+
+// 2) luego autos
 app.use("/", autosRoutes);
 
-// admin primero (aquí va /admin/autos/nuevo)
+// 3) admin con su prefijo
 app.use("/admin", ensureAdmin, adminRoutes);
-
-// tus rutas de reservas
-app.use("/", reservationsRoutes);
 
 // ADMIN directo
 app.get("/admin", ensureAdmin, (req, res) => {

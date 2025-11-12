@@ -168,16 +168,15 @@
         <!-- Filtros -->
         <form method="GET" action="/catalogo" class="row g-3 mb-4">
           <div class="col-md-3">
-            <label for="year" class="form-label">Año</label>
-            <input
-              type="number"
-              class="form-control"
-              id="year"
-              name="year"
-              placeholder="2024"
-              value="<%= filters.year || '' %>"
-            />
-          </div>
+  <label for="year" class="form-label">Año</label>
+  <select id="year" name="year" class="form-select">
+    <option value="">Todos</option>
+    <% for (let y = 2026; y >= 1980; y--) { %>
+      <option value="<%= y %>" <%= filters.year === String(y) ? 'selected' : '' %>><%= y %></option>
+    <% } %>
+  </select>
+</div>
+
 
           <div class="col-md-3">
             <label for="tipo" class="form-label">Tipo</label>
@@ -227,51 +226,61 @@
           <% } %>
 
           <% cars.forEach(car => { %>
-            <div class="col-sm-6 col-md-4 col-lg-3">
-              <div class="car-card">
-                <img
-                  src="<%= car.image_url && car.image_url !== '' ? car.image_url : '/Assets/Imgs/placeholder-car.jpg' %>"
-                  alt="<%= car.brand %> <%= car.model %>"
-                >
-                <div class="p-3">
-                  <!-- nombre -->
-                  <h5 class="mb-1"><%= car.brand %> <%= car.model %></h5>
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="car-card">
+      <img
+        src="<%= car.image_url && car.image_url !== '' ? car.image_url : '/Assets/Imgs/placeholder-car.jpg' %>"
+        alt="<%= car.brand %> <%= car.model %>"
+      >
+      <div class="p-3">
+        <!-- nombre -->
+        <h5 class="mb-1"><%= car.brand %> <%= car.model %></h5>
 
-                  <!-- tipo -->
-                  <% if (car.body_type) { %>
-                    <p class="mb-2">
-                      <span class="badge bg-light text-dark">
-                        <%= car.body_type.toUpperCase() %>
-                      </span>
-                    </p>
-                  <% } %>
+        <!-- tipo (body_type) -->
+        <% 
+          const type = car.body_type ? car.body_type.toLowerCase() : null;
+          let typeLabel = "";
+          if (type === "sedan") typeLabel = "Sedán";
+          else if (type === "hatchback") typeLabel = "Hatchback";
+          else if (type === "suv") typeLabel = "SUV / Camioneta";
+          else if (type === "pickup") typeLabel = "Pickup";
+          else if (type) typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+        %>
+        <% if (typeLabel) { %>
+          <p class="mb-2">
+            <span class="badge bg-light text-dark">
+              <%= typeLabel %>
+            </span>
+          </p>
+        <% } %>
 
-                  <!-- detalles: pasajeros y año -->
-                  <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
-                    <span class="d-flex align-items-center gap-1">
-                      <img class="icon" src="/Assets/Imgs/person.svg" alt="person">
-                      <%= car.seats || 5 %> pax
-                    </span>
-                    <span><%= car.year %></span>
-                  </div>
+        <!-- detalles: pasajeros y año -->
+        <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
+          <span class="d-flex align-items-center gap-1">
+            <img class="icon" src="/Assets/Imgs/person.svg" alt="person">
+            <%= car.seats || 5 %> pax
+          </span>
+          <span><%= car.year %></span>
+        </div>
 
-                  <!-- precio -->
-                  <p class="fw-semibold mb-3" style="font-size: 1.05rem;">
-                    $<%= Number(car.price_per_day).toLocaleString('es-MX') %> MXN/día
-                  </p>
-                  <% if (currentUser) { %>
-                    <a href="/cars/<%= car.id %>/reserve" class="btn btn-sm btn-outline-dark w-100">
-                      Rentar
-                    </a>
-                  <% } else { %>
-                    <a href="/login?returnTo=/cars/<%= car.id %>/reserve" class="btn btn-sm btn-outline-dark w-100">
-                      Rentar
-                    </a>
-                  <% } %>
-                </div>
-              </div>
-            </div>
-          <% }) %>
+        <!-- precio -->
+        <p class="fw-semibold mb-3" style="font-size: 1.05rem;">
+          $<%= Number(car.price_per_day).toLocaleString('es-MX') %> MXN/día
+        </p>
+
+        <% if (currentUser) { %>
+          <a href="/cars/<%= car.id %>/reserve" class="btn btn-sm btn-outline-dark w-100">
+            Rentar
+          </a>
+        <% } else { %>
+          <a href="/login?returnTo=/cars/<%= car.id %>/reserve" class="btn btn-sm btn-outline-dark w-100">
+            Rentar
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+<% }) %>
         </div>
       </div>
     </main>

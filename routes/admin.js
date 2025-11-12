@@ -1,49 +1,66 @@
 // routes/admin.js
 import express from "express";
 import pool from "../db.js";
-import multer from "multer";
-import path from "path";
-import fs from "fs";
 
 const router = express.Router();
 
-// asegurar carpeta
-const UPLOAD_DIR = "public/uploads";
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
-
-// === MULTER para subir imagen ===
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, UPLOAD_DIR);
-  },
-  filename: (req, file, cb) => {
-    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, unique + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage });
-
-// DASHBOARD (dejamos simple para que no truene por otras tablas)
+// DASHBOARD
 router.get("/dashboard", async (req, res) => {
   try {
     const [[{ publicados }]] = await pool.query(
-      "SELECT COUNT(*) AS publicados FROM cars WHERE status = 'available'"
+      "SELECT COUNT(*) AS publicados FROM cars WHERE status IN ('available','publicado')"
+    );
+
+    const [[{ reservasMes }]] = await pool.query(
+      `SELECT COUNT(*) AS reservasMes
+       FROM reservations
+       WHERE status <> 'cancelled'
+         AND MONTH(created_at) = MONTH(CURDATE())
+         AND YEAR(created_at) = YEAR(CURDATE())`
+    );
+
+    const [[{ reservados }]] = await pool.query(
+      "SELECT COUNT(*) AS reservados FROM reservations WHERE status <> 'cancelled'"
+    );
+
+    const [[{ ingresos }]] = await pool.query(
+      `SELECT IFNULL(SUM(total_amount), 0) AS ingresos
+       FROM reservations
+       WHERE status <> 'cancelled'
+         AND MONTH(created_at) = MONTH(CURDATE())
+         AND YEAR(created_at) = YEAR(CURDATE())`
+    );
+
+    const [movimientos] = await pool.query(
+      `
+      SELECT r.id,
+             r.created_at,
+             r.start_date,
+             r.end_date,
+             r.status,
+             c.brand,
+             c.model,
+             u.name AS user_name
+      FROM reservations r
+      JOIN cars c ON c.id = r.car_id
+      JOIN users u ON u.id = r.user_id
+      ORDER BY r.created_at DESC
+      LIMIT 5
+      `
     );
 
     res.render("admin/dashboard", {
       publicados,
-      vendidos: 0,
-      reservados: 0,
-      ingresos: 0,
-      movimientos: [],
+      reservasMes,
+      reservados,
+      ingresos,
+      movimientos,
     });
   } catch (err) {
     console.error("Error en dashboard admin:", err);
     res.render("admin/dashboard", {
       publicados: 0,
-      vendidos: 0,
+      reservasMes: 0,
       reservados: 0,
       ingresos: 0,
       movimientos: [],
@@ -51,63 +68,37 @@ router.get("/dashboard", async (req, res) => {
   }
 });
 
-// GET formulario
-router.get("/autos/nuevo", (req, res) => {
-  res.render("admin/new-car", { error: null });
-});
+// LISTA COMPLETA → /admin/ventas
+router.get("/ventas", async (req, res) => {
+  try {
+    const [reservas] = await pool.query(
+      `
+      SELECT r.id,
+             r.created_at,
+             r.start_date,
+             r.end_date,
+             r.status,
+             r.total_amount,
+             c.brand,
+             c.model,
+             u.name  AS user_name,
+             u.email AS user_email
+      FROM reservations r
+      JOIN cars c ON c.id = r.car_id
+      JOIN users u ON u.id = r.user_id
+      ORDER BY r.created_at DESC
+      `
+    );
 
-// POST guardar
-router.post(
-  "/autos/nuevo",
-  upload.single("image_file"),
-  async (req, res) => {
-    try {
-      const {
-        title,
-        brand,
-        model,
-        year,
-        price_per_day,
-        description,
-        category,
-        image_url,
-      } = req.body;
-
-      // prioridad: archivo > url > placeholder
-      let finalImage = "/Assets/Imgs/placeholder-car.jpg";
-
-      if (req.file) {
-        finalImage = "/uploads/" + req.file.filename;
-      } else if (image_url && image_url.trim() !== "") {
-        finalImage = image_url.trim();
-      }
-
-      // IMPORTANTE: solo columnas que sabemos que tienes
-      // (en tu index.js haces SELECT de brand, model, year, price_per_day, image_url)
-      await pool.query(
-        `INSERT INTO cars 
-          (title, brand, model, year, price_per_day, description, category, image_url, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available')`,
-        [
-          title,
-          brand,
-          model,
-          year,
-          price_per_day,
-          description || null,
-          category || null,
-          finalImage,
-        ]
-      );
-
-      res.redirect("/catalogo");
-    } catch (err) {
-      console.error("Error creando auto:", err); // 👈 mira esto en la consola
-      res.status(500).render("admin/new-car", {
-        error: "Ocurrió un error al guardar el auto. Revisa la consola del servidor.",
-      });
-    }
+    res.render("admin/bookings", {
+      reservas,
+    });
+  } catch (err) {
+    console.error("Error listando reservas admin:", err);
+    res.render("admin/bookings", {
+      reservas: [],
+    });
   }
-);
+});
 
 export default router;

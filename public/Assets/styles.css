@@ -668,11 +668,14 @@ footer {
 }
 
 /* cards */
+/* cards (RESPONSIVE de verdad) */
 .cards_admin {
   display: grid;
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  /* se acomodan solas según el ancho */
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 1rem;
 }
+
 
 .card_admin {
   background: #fff;
@@ -743,4 +746,70 @@ footer {
   margin-top: .75rem;
   background: rgba(255,255,255,0.03);
   font-weight: 500;
+}
+
+/* ===== override responsive admin más agresivo ===== */
+@media (max-width: 1200px) {
+  /* sidebar arriba */
+  .admin-layout {
+    flex-direction: column !important;
+  }
+
+  .admin-layout .sidebar {
+    width: 100% !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: .75rem !important;
+    overflow-x: auto !important;
+  }
+
+  .admin-layout .sidebar__nav {
+    flex-direction: row !important;
+    gap: .5rem !important;
+  }
+
+  /* main sin margen y con menos padding */
+  .admin-layout .main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 1rem 1rem 2rem !important;
+  }
+
+  /* header en columna */
+  .admin-layout .main__header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: .5rem !important;
+  }
+
+  /* cards que se acomodan solas */
+  .admin-layout .cards_admin {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    gap: 1rem !important;
+  }
+
+  .admin-layout .card_admin {
+    min-height: 120px !important;
+  }
+
+  /* panel ancho */
+  .admin-layout .panel {
+    width: 100% !important;
+    margin-top: 1rem !important;
+  }
+}
+
+/* extra chico: 600px */
+@media (max-width: 600px) {
+  .admin-layout .cards_admin {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .cards_admin {
+    grid-template-columns: 1fr;
+  }
 }

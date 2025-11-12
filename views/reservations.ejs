@@ -37,7 +37,6 @@
       }
       .badge.status-pill { text-transform: capitalize; }
 
-      /* overlay */
       .refund-overlay {
         position: fixed;
         inset: 0;
@@ -77,7 +76,7 @@
           <a href="/catalogo" class="btn btn-outline-dark btn-sm">Rentar otro auto</a>
         </div>
 
-        <%
+        <% 
           function fechaBonita(d) {
             if (!d) return "";
             let iso;
@@ -112,6 +111,16 @@
                     <p class="text-muted mb-2" style="font-size:.85rem;">
                       $<%= Number(r.price_per_day).toLocaleString('es-MX') %> MXN/día
                     </p>
+
+                    <% 
+                      const totalMostrar = Number(
+                        (r.total_amount ?? r.computed_total ?? 0)
+                      );
+                    %>
+                    <p class="mb-2" style="font-size:.8rem;">
+                      Total: $<%= totalMostrar.toLocaleString('es-MX') %> MXN
+                    </p>
+
                     <p class="mb-2" style="font-size:.8rem;">
                       <strong>Del:</strong> <%= fechaBonita(r.start_date) %><br>
                       <strong>Al:</strong> <%= fechaBonita(r.end_date) %>
@@ -188,16 +197,14 @@
       }
 
       if (isRefund) {
-        // mensaje de reembolso
         if (amountRaw) {
           const amountNumber = Number(amountRaw);
           const amountText = isNaN(amountNumber) ? amountRaw : fmt.format(amountNumber);
-          createOverlay(`El reembolso de ${amountText} serán reembolsados a su método de pago original en 7 a 10 días hábiles.`);
+          createOverlay(`El reembolso de ${amountText} se verá reflejado en 7 a 10 días hábiles.`);
         } else {
-          createOverlay(`El reembolso de los ${diasMenos ? diasMenos + " día(s) menos" : "días menos"} a su tarjeta con la que pagó se verá reflejado en 7 a 10 días hábiles.`);
+          createOverlay(`El reembolso de los ${diasMenos ? diasMenos + " día(s) menos" : "días menos"} se verá reflejado en 7 a 10 días hábiles.`);
         }
       } else if (isPaid) {
-        // mensaje de éxito por pagar diferencia
         createOverlay("Tu cambio de fechas se realizó correctamente.");
       }
     </script>

@@ -3,31 +3,187 @@
   <head>
     <meta charset="UTF-8" />
     <title>Panel administrador</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="/Assets/styles.css">
+    <style>
+      /* ====== CARDS ====== */
+      .cards_admin {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+      }
+      .card_admin {
+        background: #fff;
+        border-radius: 1rem;
+        padding: 1rem 1rem .8rem;
+        box-shadow: 0 10px 25px rgba(15,23,42,.04);
+      }
+      .card_admin h2 {
+        margin: 0 0 .25rem;
+        font-size: 1.45rem;
+      }
+      .card_admin p {
+        margin: 0;
+        font-size: .8rem;
+        color: #64748b;
+      }
+
+      .panel {
+        background: #fff;
+        border-radius: 1rem;
+        padding: 1rem;
+        box-shadow: 0 10px 25px rgba(15,23,42,.02);
+      }
+      .panel__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: .6rem;
+      }
+      .movements-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+      }
+      .movement-item {
+        background: #f8fafc;
+        border-radius: .6rem;
+        padding: .45rem .6rem;
+      }
+      .movement-meta {
+        font-size: .72rem;
+        color: #64748b;
+      }
+
+      /* ====== LAYOUT BASE ====== */
+      .admin-layout {
+        display: flex;
+        min-height: 100vh;
+        background: #f1f5f9;
+      }
+
+      /* ====== SIDEBAR PROTEGIDA POR ID ====== */
+      #adminSidebar {
+        background: #0f172a;
+        color: #fff;
+        padding: 1rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        min-width: 230px;
+      }
+      #adminSidebar .admin-sidebar__brand {
+        display: flex;
+        gap: .5rem;
+        align-items: center;
+        font-weight: 600;
+      }
+      /* esto es el menú en desktop */
+      #adminSidebarNav {
+        display: flex;
+        flex-direction: column;
+        gap: .4rem;
+      }
+      #adminSidebarNav .admin-sidebar__link {
+        color: #e2e8f0;
+        text-decoration: none;
+        padding: .4rem .6rem;
+        border-radius: .35rem;
+      }
+      #adminSidebarNav .admin-sidebar__link--active {
+        background: rgba(255,255,255,.1);
+      }
+
+      .main {
+        flex: 1;
+        padding: 1.5rem;
+      }
+
+      /* botón hamburguesa oculto en desktop */
+      #adminSidebarToggle {
+        display: none;
+      }
+
+      @media (max-width: 900px) {
+        .admin-layout {
+          flex-direction: column;
+        }
+
+        #adminSidebar {
+          width: 100%;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          position: relative;
+        }
+
+        #adminSidebarToggle {
+          display: inline-block;
+          background: none;
+          border: 1px solid rgba(255,255,255,.3);
+          color: #fff;
+          border-radius: .4rem;
+          padding: .25rem .5rem;
+          font-size: .9rem;
+        }
+
+        /* aquí lo escondemos en mobile SÍ o SÍ */
+        #adminSidebarNav {
+          display: none;
+          flex-direction: column;
+          gap: .5rem;
+          background: #0f172a;
+          width: 100%;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          padding: .6rem .75rem .75rem;
+          border-bottom-left-radius: .75rem;
+          border-bottom-right-radius: .75rem;
+          box-shadow: 0 10px 25px rgba(15,23,42,.25);
+          z-index: 999; /* por si hay algo encima */
+        }
+
+        /* cuando el ASIDE tenga is-open, mostramos el nav */
+        #adminSidebar.is-open #adminSidebarNav {
+          display: flex !important;
+        }
+
+        .main {
+          padding: 1rem;
+        }
+        .cards_admin {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
   </head>
 
   <body class="admin-layout">
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar__brand">
-        <span class="sidebar__icon">🚗</span>
-        <span class="sidebar__title">Auto Dealer</span>
+    <aside id="adminSidebar">
+      <div class="admin-sidebar__brand">
+        <span class="admin-sidebar__icon">🚗</span>
+        <span class="admin-sidebar__title">Auto Dealer</span>
       </div>
-      <nav class="sidebar__nav">
-        <a href="/admin/dashboard" class="sidebar__link sidebar__link--active">Dashboard</a>
-        <a href="/autos" class="sidebar__link">Inventario</a>
-        <a href="/ventas" class="sidebar__link">Ventas</a>
-        <!-- IMPORTANTE: aquí va /admin/... -->
-        <a href="/admin/autos/nuevo" class="sidebar__link">Publicar auto</a>
-        <a href="/" class="sidebar__link sidebar__link--secondary" target="_blank"> Ver sitio</a>
+      <button id="adminSidebarToggle" type="button">☰</button>
+      <nav id="adminSidebarNav">
+        <a href="/admin/dashboard" class="admin-sidebar__link admin-sidebar__link--active">Dashboard</a>
+        <a href="/autos" class="admin-sidebar__link">Inventario</a>
+        <a href="/admin/ventas" class="admin-sidebar__link">Ventas / Reservas</a>
+        <a href="/admin/autos/nuevo" class="admin-sidebar__link">Publicar auto</a>
+        <a href="/" class="admin-sidebar__link" target="_blank">Ver sitio</a>
       </nav>
     </aside>
 
     <!-- Contenido -->
     <main class="main">
-      <header class="main__header">
+      <header class="main__header" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
         <h1 class="main__title">Dashboard</h1>
-        <!-- IMPORTANTE: aquí también -->
         <a href="/admin/autos/nuevo" class="btn btn--primary">+ Nuevo auto</a>
       </header>
 
@@ -37,35 +193,53 @@
           <p class="card__label">Autos publicados</p>
         </article>
         <article class="card_admin">
-          <h2 class="card__number"><%= vendidos %></h2>
-          <p class="card__label">Vendidos este mes</p>
+          <h2 class="card__number"><%= reservasMes %></h2>
+          <p class="card__label">Reservas este mes</p>
         </article>
         <article class="card_admin">
           <h2 class="card__number"><%= reservados %></h2>
-          <p class="card__label">Reservados</p>
+          <p class="card__label">Reservas activas</p>
         </article>
         <article class="card_admin">
-          <h2 class="card__number">$<%= ingresos %></h2>
-          <p class="card__label">Ingresos del mes</p>
+          <h2 class="card__number">$<%= Number(ingresos || 0).toLocaleString('es-MX') %></h2>
+          <p class="card__label">Ingresos por reservas (mes)</p>
         </article>
       </section>
 
       <section class="panel">
         <div class="panel__header">
           <h2>Movimientos recientes</h2>
+          <a href="/admin/ventas" class="btn btn--primary" style="background:#e11d48;">Ver todas</a>
         </div>
-        <% if (movimientos.length === 0) { %>
-          <p class="empty">No hay ventas recientes.</p>
+        <% if (!movimientos || movimientos.length === 0) { %>
+          <p class="empty">No hay reservas recientes.</p>
         <% } else { %>
-          <ul>
+          <ul class="movements-list">
             <% movimientos.forEach(m => { %>
-              <li>
-                Venta #<%= m.id %> - <%= m.cliente_nombre || 'Cliente' %> - <%= m.fecha_venta %>
+              <li class="movement-item">
+                <strong>Reserva #<%= m.id %></strong> — <%= m.brand %> <%= m.model %> —
+                <span class="movement-meta">
+                  del <%= m.start_date %> al <%= m.end_date %>
+                  · <%= m.user_name %>
+                  · $<%= Number(m.total_amount || 0).toLocaleString('es-MX') %>
+                  · <em><%= m.status %></em>
+                </span>
               </li>
             <% }) %>
           </ul>
         <% } %>
       </section>
     </main>
+
+    <script>
+      const adminBtn = document.getElementById('adminSidebarToggle');
+      const adminSidebar = document.getElementById('adminSidebar');
+
+      if (adminBtn && adminSidebar) {
+        adminBtn.addEventListener('click', () => {
+          adminSidebar.classList.toggle('is-open');
+        });
+      }
+    </script>
   </body>
 </html>
