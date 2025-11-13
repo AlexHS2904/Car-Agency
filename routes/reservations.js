@@ -30,6 +30,202 @@ function parseRange(input) {
 }
 
 /* =========================
+   RENTAR AUTO - GET
+   ========================= */
+router.get("/cars/:id/reserve", ensureLogged, async (req, res) => {
+  const carId = req.params.id;
+
+  try {
+    // Traer datos del auto
+    const [[car]] = await pool.query(
+      "SELECT * FROM cars WHERE id = ?",
+      [carId]
+    );
+
+    if (!car) {
+      return res.status(404).send("Auto no encontrado.");
+    }
+
+    // Traer reservas existentes del mismo auto para bloquear fechas
+    const [booked] = await pool.query(
+      `
+      SELECT start_date, end_date
+      FROM reservations
+      WHERE car_id = ?
+        AND status <> 'cancelled'
+      `,
+      [carId]
+    );
+
+    return res.render("reserve_car", {
+      car,
+      reservations: booked, // se usa en el JSON para flatpickr
+      errors: [],
+      formData: {}
+    });
+  } catch (err) {
+    console.error("GET /cars/:id/reserve error:", err);
+    return res.status(500).send("No se pudo cargar la vista de renta.");
+  }
+});
+
+/* =========================
+   RENTAR AUTO - POST
+   ========================= */
+router.post("/cars/:id/reserve", ensureLogged, async (req, res) => {
+  const carId = req.params.id;
+  const userId = req.session.user.id;
+
+  const {
+    dateRange,
+    first_name,
+    last_name,
+    email,
+    notes,
+    paymentMethod,
+    cc_name,
+    cc_number,
+    cc_exp,
+    cc_cvv,
+    calculated_total
+  } = req.body;
+
+  const formData = {
+    first_name,
+    last_name,
+    email,
+    notes,
+    paymentMethod,
+    cc_name,
+    cc_number,
+    cc_exp,
+    cc_cvv
+  };
+
+  const errors = [];
+
+  try {
+    // 1) Traer auto
+    const [[car]] = await pool.query(
+      "SELECT * FROM cars WHERE id = ?",
+      [carId]
+    );
+    if (!car) {
+      return res.status(404).send("Auto no encontrado.");
+    }
+
+    // 2) Rango de fechas
+    const [start_date, end_date] = parseRange(dateRange);
+    if (!start_date || !end_date) {
+      errors.push("Selecciona un rango de fechas válido.");
+    }
+
+    // 3) Validaciones básicas de contacto (solo lógica, el guardado puede ser mínimo)
+    if (!first_name || !last_name) {
+      errors.push("Nombre y apellidos son obligatorios.");
+    }
+    if (!email) {
+      errors.push("El correo de contacto es obligatorio.");
+    }
+
+    // 4) Validar datos de tarjeta si el método es crédito/débito
+    if (paymentMethod === "credit" || paymentMethod === "debit") {
+      if (!cc_name || !cc_number || !cc_exp || !cc_cvv) {
+        errors.push("Completa los datos de la tarjeta o elige otro método de pago.");
+      }
+    }
+
+    // 5) Conflictos de fechas con otras reservas
+    if (start_date && end_date) {
+      const [conflicts] = await pool.query(
+        `
+        SELECT id
+        FROM reservations
+        WHERE car_id = ?
+          AND status <> 'cancelled'
+          AND NOT (end_date <= ? OR start_date >= ?)
+        `,
+        [carId, start_date, end_date]
+      );
+      if (conflicts.length > 0) {
+        errors.push("Las fechas seleccionadas ya están reservadas.");
+      }
+    }
+
+    // Si hay errores, re-render con datos
+    if (errors.length > 0) {
+      const [booked] = await pool.query(
+        `
+        SELECT start_date, end_date
+        FROM reservations
+        WHERE car_id = ?
+          AND status <> 'cancelled'
+        `,
+        [carId]
+      );
+
+      return res.status(400).render("reserve_car", {
+        car,
+        reservations: booked,
+        errors,
+        formData
+      });
+    }
+
+    // 6) Calcular días y total (validación lado servidor)
+    const [[{ days }]] = await pool.query(
+      `SELECT GREATEST(DATEDIFF(?, ?), 0) AS days`,
+      [end_date, start_date]
+    );
+    const pricePerDay = Number(car.price_per_day || 0);
+    const total = days * pricePerDay;
+
+    // 7) Insertar reserva (solo columnas que sabemos que existen)
+    await pool.query(
+      `
+      INSERT INTO reservations
+        (user_id, car_id, start_date, end_date, total_amount, status)
+      VALUES
+        (?, ?, ?, ?, ?, 'confirmed')
+      `,
+      [userId, carId, start_date, end_date, total]
+    );
+
+    // 8) Redirigir a la lista con overlay de éxito (ya lo manejas con ?paid=1)
+    return res.redirect("/mis-rentas?paid=1");
+  } catch (err) {
+    console.error("POST /cars/:id/reserve error:", err);
+
+    // En caso de error, volvemos a mostrar la vista con mensaje genérico
+    try {
+      const [[car]] = await pool.query(
+        "SELECT * FROM cars WHERE id = ?",
+        [carId]
+      );
+      const [booked] = await pool.query(
+        `
+        SELECT start_date, end_date
+        FROM reservations
+        WHERE car_id = ?
+          AND status <> 'cancelled'
+        `,
+        [carId]
+      );
+
+      return res.status(500).render("reserve_car", {
+        car,
+        reservations: booked,
+        errors: ["Ocurrió un error al crear la reserva. Intenta de nuevo."],
+        formData
+      });
+    } catch (innerErr) {
+      console.error("Error adicional al re-renderizar reserva:", innerErr);
+      return res.status(500).send("Error interno al crear la reserva.");
+    }
+  }
+});
+
+/* =========================
    LISTA DE MIS RENTAS
    ========================= */
 router.get("/mis-rentas", ensureLogged, async (req, res) => {
