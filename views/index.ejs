@@ -32,35 +32,46 @@
   <%- include("partials/header.ejs") %>
 
   <!-- Sección Home -->
-  <section class="Home" id="Home">
+<section class="Home" id="Home">
+  <!-- Video de fondo -->
+  <video class="home-video" autoplay muted loop playsinline>
+    <source src="/Assets/Imgs/video_audi.mp4" type="video/mp4" />
+  </video>
+
+  <div class="home-overlay"></div>
+
+  <!-- Contenido encima del video -->
+  <div class="home-content">
     <div class="px-4 py-5 my-5 text-center">
       <h1 class="display-5 fw-bold text-body-emphasis">
         Potencia y estilo en un solo lugar.
       </h1>
       <div class="col-lg-6 mx-auto">
-        <p class="lead mb-4 text-center">Diseñado para superar expectativas.</p>
+        <p class="lead mb-4 text-center">
+          Diseñado para superar expectativas.
+        </p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-        <a href="/#cat" class="btn btn-light btn-lg px-4 gap-3">
-          Ver catálogo
-        </a>
-        <a
-  href="https://wa.me/<%= whatsAppPhone %>?text=<%= waText %>"
-  target="_blank"
-  rel="noopener"
-  class="btn btn-outline-light btn-lg px-4"
->
-  Cotizar un auto
-</a>
-
+          <a href="/#cat" class="btn btn-light btn-lg px-4 gap-3">
+            Ver catálogo
+          </a>
+          <a
+            href="https://wa.me/<%= whatsAppPhone %>?text=<%= waText %>"
+            target="_blank"
+            rel="noopener"
+            class="btn btn-outline-light btn-lg px-4"
+          >
+            Cotizar un auto
+          </a>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Sección Categorías -->
-  <h1 class="section-title" id="cat">Categorías</h1>
+<!-- Sección Categorías -->
+<h1 class="section-title" id="cat">Categorías</h1>
 
-  <section id="Categories">
+<section id="Categories">
   <div class="card-container">
     <div
       class="card"
@@ -87,6 +98,7 @@
     </div>
   </div>
 </section>
+
 
 
   <!-- Sección Recomendaciones -->

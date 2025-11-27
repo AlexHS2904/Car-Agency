@@ -124,21 +124,47 @@
 /* Home */
 
 #Home {
-    background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), 
-                url('./Imgs/Audi.jpg') center/cover !important;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    position: relative;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center !important;
+    overflow: hidden; /* por si el video se “sale” un poco */
+}
+
+/* Video de fondo */
+#Home .home-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+}
+
+/* Capa con degradado */
+#Home .home-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        rgba(0,0,0,0.1),
+        rgba(0,0,0,0.1)
+    );
+    z-index: -1;
+}
+
+/* Contenido encima del video */
+#Home .home-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
 }
 
 #Home .text-body-emphasis {
   text-align: center !important;
   color: #ffffff !important;
-  font-size:60px;
+  font-size: 60px;
   font-family: "Montserrat", sans-serif;
   font-optical-sizing: auto;
   font-weight: 300 !important;
@@ -157,8 +183,8 @@
     font-style: normal;
 }
 
-#Home a{
-font-family: "Montserrat", sans-serif;
+#Home a {
+  font-family: "Montserrat", sans-serif;
   font-optical-sizing: auto;
   font-weight: 480 !important;
   font-style: normal;
@@ -177,22 +203,21 @@ font-family: "Montserrat", sans-serif;
     }
 
     #Home .text-body-emphasis {
-  color: #ffffff !important;
-  font-size:30px;
-  font-family: "Montserrat", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 300 !important;
-  font-style: normal;
+      color: #ffffff !important;
+      font-size: 30px;
+      font-family: "Montserrat", sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 300 !important;
+      font-style: normal;
+    }
 
-}
-
-#Home .lead {
-    color: rgba(255, 255, 255, 0.9) !important;
-    font-family: "Montserrat", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 100;
-    font-style: normal;
-}
+    #Home .lead {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-family: "Montserrat", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 100;
+        font-style: normal;
+    }
 }
 
 /* Para tablets */
@@ -201,6 +226,7 @@ font-family: "Montserrat", sans-serif;
         height: 80vh;
     }
 }
+
 
 .section-title {
     padding-top: 60px;
@@ -897,11 +923,10 @@ footer {
 .about-card ul{ margin:0 0 1.2rem 1.2rem; color:#475569; }
 .about-card li{ margin:.35rem 0; }
 
-/* ====== Acentos en rojo  ====== */
 .about-badge{
   display:inline-flex; align-items:center; gap:.4rem;
   background: rgba(225,29,72,.09);
-  color:#e11d48; /* rojo */
+  color:#e11d48;
   padding:.4rem .65rem; border-radius:.75rem; font-size:.72rem; font-weight:700;
 }
 .badge-dot{ width:8px; height:8px; background:#e11d48; border-radius:999px; }
