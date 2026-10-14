@@ -4,6 +4,28 @@ import pool from "../db.js";
 
 const router = Router();
 
+function calculateDays(startDate, endDate) {
+  const toUTC = (value) => {
+    const dateString =
+      value instanceof Date
+        ? value.toISOString().slice(0, 10)
+        : String(value).slice(0, 10);
+
+    const [year, month, day] = dateString.split("-").map(Number);
+
+    return Date.UTC(year, month - 1, day);
+  };
+
+  const millisecondsPerDay = 1000 * 60 * 60 * 24;
+
+  return Math.max(
+    Math.round(
+      (toUTC(endDate) - toUTC(startDate)) / millisecondsPerDay
+    ),
+    0
+  );
+}
+
 /* =========================
    MIDDLEWARE
    ========================= */
@@ -172,11 +194,34 @@ router.post("/cars/:id/reserve", ensureLogged, async (req, res) => {
       });
     }
 
-    // 6) Calcular días y total (validación lado servidor)
-    const [[{ days }]] = await pool.query(
-      `SELECT GREATEST(DATEDIFF(?, ?), 0) AS days`,
-      [end_date, start_date]
+    // 6) Calcular días y total
+    const [startYear, startMonth, startDay] = start_date
+      .split("-")
+      .map(Number);
+
+    const [endYear, endMonth, endDay] = end_date
+      .split("-")
+      .map(Number);
+
+    const startUTC = Date.UTC(
+      startYear,
+      startMonth - 1,
+      startDay
     );
+
+    const endUTC = Date.UTC(
+      endYear,
+      endMonth - 1,
+      endDay
+    );
+
+    const millisecondsPerDay = 1000 * 60 * 60 * 24;
+
+    const days = Math.max(
+      Math.round((endUTC - startUTC) / millisecondsPerDay),
+      0
+    );
+
     const pricePerDay = Number(car.price_per_day || 0);
     const total = days * pricePerDay;
 
@@ -246,7 +291,7 @@ router.get("/mis-rentas", ensureLogged, async (req, res) => {
         c.year,
         c.price_per_day,
         COALESCE(c.image_url, '') AS image_url,
-        (DATEDIFF(r.end_date, r.start_date) * c.price_per_day) AS computed_total
+        ((r.end_date - r.start_date) * c.price_per_day) AS computed_total
       FROM reservations r
       JOIN cars c ON c.id = r.car_id
       WHERE r.user_id = ?
@@ -393,13 +438,14 @@ router.post("/reservas/:id/editar", ensureLogged, async (req, res) => {
     }
 
     // Cálculo de días y diferencias
-    const [[{ oldDays }]] = await pool.query(
-      `SELECT GREATEST(DATEDIFF(?, ?), 0) AS oldDays`,
-      [reserva.end_date, reserva.start_date]
+    const oldDays = calculateDays(
+      reserva.start_date,
+      reserva.end_date
     );
-    const [[{ newDays }]] = await pool.query(
-      `SELECT GREATEST(DATEDIFF(?, ?), 0) AS newDays`,
-      [new_end, new_start]
+
+    const newDays = calculateDays(
+      new_start,
+      new_end
     );
 
     const price = Number(reserva.price_per_day || 0);
@@ -439,49 +485,76 @@ router.post("/reservas/:id/editar", ensureLogged, async (req, res) => {
 /* =========================
    PAGAR DIFERENCIA - GET
    ========================= */
-router.get("/reservas/:id/pagar_diferencia", ensureLogged, async (req, res) => {
-  const { id } = req.params;
-  const userId = req.session.user.id;
-  const { new_start, new_end, extra } = req.query;
+router.get(
+  "/reservas/:id/pagar_diferencia",
+  ensureLogged,
+  async (req, res) => {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    const { new_start, new_end, extra } = req.query;
 
-  try {
-    const [[row]] = await pool.query(
-      `
-      SELECT r.id, r.car_id, c.brand, c.model, c.price_per_day, COALESCE(c.image_url,'') AS image_url
-      FROM reservations r
-      JOIN cars c ON c.id = r.car_id
-      WHERE r.id = ? AND r.user_id = ?
-      `,
-      [id, userId]
-    );
-    if (!row) return res.status(404).send("Reserva no encontrada.");
+    try {
+      const [[row]] = await pool.query(
+        `
+        SELECT
+          r.id,
+          r.car_id,
+          r.start_date,
+          r.end_date,
+          c.brand,
+          c.model,
+          c.price_per_day,
+          COALESCE(c.image_url, '') AS image_url
+        FROM reservations r
+        JOIN cars c ON c.id = r.car_id
+        WHERE r.id = ?
+          AND r.user_id = ?
+        `,
+        [id, userId]
+      );
 
-    const [[{ oldDays }]] = await pool.query(
-      `SELECT GREATEST(DATEDIFF(r.end_date, r.start_date), 0) AS oldDays
-         FROM reservations r WHERE r.id = ?`,
-      [id]
-    );
-    const [[{ newDays }]] = await pool.query(
-      `SELECT GREATEST(DATEDIFF(?, ?), 0) AS newDays`,
-      [new_end, new_start]
-    );
+      if (!row) {
+        return res.status(404).send("Reserva no encontrada.");
+      }
 
-    return res.render("pay_difference", {
-      car: { image_url: row.image_url, brand: row.brand, model: row.model },
-      pricePerDay: row.price_per_day,
-      oldDays,
-      newDays,
-      extraAmount: Number(extra || 0),
-      reservaId: id,
-      new_start,
-      new_end,
-      error: null,
-    });
-  } catch (err) {
-    console.error("GET /reservas/:id/pagar_diferencia error:", err);
-    return res.status(500).send("No se pudo cargar el pago de diferencia.");
+      const oldDays = calculateDays(
+        row.start_date,
+        row.end_date
+      );
+
+      const newDays = calculateDays(
+        new_start,
+        new_end
+      );
+
+      return res.render("pay_difference", {
+        car: {
+          image_url: row.image_url,
+          brand: row.brand,
+          model: row.model,
+        },
+        pricePerDay: row.price_per_day,
+        oldDays,
+        newDays,
+        extraAmount: Number(extra || 0),
+        reservaId: id,
+        new_start,
+        new_end,
+        error: null,
+      });
+
+    } catch (err) {
+      console.error(
+        "GET /reservas/:id/pagar_diferencia error:",
+        err
+      );
+
+      return res
+        .status(500)
+        .send("No se pudo cargar el pago de diferencia.");
+    }
   }
-});
+);
 
 /* =========================
    PAGAR DIFERENCIA - POST
@@ -504,9 +577,9 @@ router.post("/reservas/:id/pagar_diferencia", ensureLogged, async (req, res) => 
     );
     if (!row) return res.status(404).send("Reserva no encontrada.");
 
-    const [[{ newDays }]] = await pool.query(
-      `SELECT GREATEST(DATEDIFF(?, ?), 0) AS newDays`,
-      [new_end, new_start]
+    const newDays = calculateDays(
+      new_start,
+      new_end
     );
     const newTotal = newDays * Number(row.price_per_day || 0);
 

@@ -22,19 +22,23 @@ router.get("/dashboard", async (_req, res) => {
     );
 
     const [[{ reservasMes }]] = await pool.query(
-      `SELECT COUNT(*) AS reservasMes
-       FROM reservations
-       WHERE status <> 'cancelled'
-         AND MONTH(created_at) = MONTH(CURDATE())
-         AND YEAR(created_at) = YEAR(CURDATE())`
+      `
+      SELECT COUNT(*)::int AS "reservasMes"
+      FROM reservations
+      WHERE status <> 'cancelled'
+        AND created_at >= date_trunc('month', CURRENT_DATE)
+        AND created_at < date_trunc('month', CURRENT_DATE) + INTERVAL '1 month'
+      `
     );
 
     const [[{ ingresos }]] = await pool.query(
-      `SELECT IFNULL(SUM(total_amount), 0) AS ingresos
-       FROM reservations
-       WHERE status <> 'cancelled'
-         AND MONTH(created_at) = MONTH(CURDATE())
-         AND YEAR(created_at) = YEAR(CURDATE())`
+      `
+      SELECT COALESCE(SUM(total_amount), 0) AS ingresos
+      FROM reservations
+      WHERE status <> 'cancelled'
+        AND created_at >= date_trunc('month', CURRENT_DATE)
+        AND created_at < date_trunc('month', CURRENT_DATE) + INTERVAL '1 month'
+      `
     );
 
     const [movimientos] = await pool.query(

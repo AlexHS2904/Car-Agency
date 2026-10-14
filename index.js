@@ -80,7 +80,7 @@ app.get("/", async (req, res) => {
          seats
        FROM cars
        WHERE status IN ('available','publicado')
-       ORDER BY RAND()
+       ORDER BY RANDOM()
        LIMIT 13`
     );
 
@@ -205,7 +205,13 @@ app.post("/register", async (req, res) => {
     }
 
     const [result] = await pool.query(
-      "INSERT INTO users (name, email, phone, password, role_id) VALUES (?, ?, ?, ?, ?)",
+      `
+      INSERT INTO users
+        (name, email, phone, password, role_id)
+      VALUES
+        (?, ?, ?, ?, ?)
+      RETURNING id
+      `,
       [name, email, phone || null, password, 2]
     );
 
