@@ -1,165 +1,1123 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
+
   <title>Inventario</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="/Assets/styles.css">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  />
+
+  <link
+    rel="stylesheet"
+    href="/Assets/styles.css"
+  >
+
   <style>
-    /* ====== LAYOUT + SIDEBAR (igual que admin) ====== */
-    .admin-layout{ display:flex; min-height:100vh; background:#f1f5f9; }
 
-    #adminSidebar{
-      background:#0f172a; color:#fff; padding:1rem 1.25rem;
-      display:flex; flex-direction:column; gap:1rem; min-width:230px;
-    }
-    #adminSidebar .admin-sidebar__brand{ display:flex; gap:.5rem; align-items:center; font-weight:600; }
-    #adminSidebarNav{ display:flex; flex-direction:column; gap:.4rem; }
-    #adminSidebarNav .admin-sidebar__link{
-      color:#e2e8f0; text-decoration:none; padding:.4rem .6rem; border-radius:.35rem;
-    }
-    #adminSidebarNav .admin-sidebar__link--active{ background:rgba(255,255,255,.1); }
-    #adminSidebarToggle{ display:none; }
+    /* =========================
+       LAYOUT
+    ========================= */
 
-    .main{ flex:1; padding:1.5rem; }
-    .wrap{
-      max-width:1100px; margin:0 auto; background:#fff; border-radius:1rem;
-      padding:1.2rem 1.4rem; box-shadow:0 10px 25px rgba(15,23,42,.05);
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+      background: #f1f5f9;
     }
 
-    /* ====== INVENTARIO ====== */
-    .head{ display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:.8rem; }
-    .search{ display:flex; gap:.5rem; flex-wrap:wrap; }
-    .search input{ padding:.5rem .7rem; border:1px solid #e5e7eb; border-radius:.5rem; min-width:240px; }
-    .btn{ display:inline-block; border:1px solid #111827; padding:.45rem .75rem; border-radius:.6rem; background:#fff; color:#111827; text-decoration:none; }
-    .btn--primary{ background:#111827; color:#fff; border-color:#111827; }
 
-    table.inv{ width:100%; border-collapse:collapse; }
-    .inv th,.inv td{ padding:.6rem .7rem; border-bottom:1px solid #eef0f2; vertical-align:middle; text-align:left; }
-    .inv thead th{ background:#f7f8fa; }
+    /* =========================
+       SIDEBAR
+    ========================= */
 
-    .thumb{ width:64px; height:44px; object-fit:cover; border-radius:.45rem; background:#f3f4f6; }
-    .pill{ display:inline-block; padding:.2rem .6rem; border-radius:999px; font-size:.75rem; text-transform:capitalize; }
-    .pill-available{ background:#dcfce7; color:#166534; }
-    .pill-reserved{  background:#fef9c3; color:#854d0e; }
-    .pill-sold{      background:#fee2e2; color:#991b1b; }
-    .pill-secondary{ background:#e5e7eb; color:#374151; }
+    #adminSidebar {
+      background: #0f172a;
+      color: #fff;
 
-    @media (max-width:900px){
-      .admin-layout{ flex-direction:column; }
-      #adminSidebar{
-        width:100%; flex-direction:row; align-items:center; justify-content:space-between; position:relative;
+      padding: 1rem 1.25rem;
+
+      display: flex;
+      flex-direction: column;
+
+      gap: 1rem;
+
+      min-width: 230px;
+    }
+
+
+    #adminSidebar .admin-sidebar__brand {
+      display: flex;
+
+      gap: .5rem;
+
+      align-items: center;
+
+      font-weight: 600;
+    }
+
+
+    #adminSidebarNav {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: .4rem;
+    }
+
+
+    #adminSidebarNav .admin-sidebar__link {
+      color: #e2e8f0;
+
+      text-decoration: none;
+
+      padding: .4rem .6rem;
+
+      border-radius: .35rem;
+
+      transition:
+        background .2s ease,
+        color .2s ease;
+    }
+
+
+    #adminSidebarNav .admin-sidebar__link:hover {
+      background: rgba(255, 255, 255, .08);
+    }
+
+
+    #adminSidebarNav .admin-sidebar__link--active {
+      background: rgba(255, 255, 255, .1);
+    }
+
+
+    #adminSidebarToggle {
+      display: none;
+    }
+
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    .main {
+      flex: 1;
+
+      padding: 1.5rem;
+
+      min-width: 0;
+    }
+
+
+    .wrap {
+      max-width: 1150px;
+
+      margin: 0 auto;
+
+      background: #fff;
+
+      border-radius: 1rem;
+
+      padding: 1.2rem 1.4rem;
+
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, .05);
+    }
+
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    .head {
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      gap: 1rem;
+
+      margin-bottom: 1rem;
+
+      flex-wrap: wrap;
+    }
+
+
+    .head h2 {
+      margin: 0;
+    }
+
+
+    /* =========================
+       SEARCH
+    ========================= */
+
+    .search {
+      display: flex;
+
+      gap: .5rem;
+
+      flex-wrap: wrap;
+    }
+
+
+    .search input {
+      padding: .5rem .7rem;
+
+      border:
+        1px solid #e5e7eb;
+
+      border-radius: .5rem;
+
+      min-width: 240px;
+
+      outline: none;
+    }
+
+
+    .search input:focus {
+      border-color: #64748b;
+    }
+
+
+    /* =========================
+       BUTTONS
+    ========================= */
+
+    .btn {
+      display: inline-block;
+
+      border:
+        1px solid #111827;
+
+      padding:
+        .45rem .75rem;
+
+      border-radius:
+        .6rem;
+
+      background: #fff;
+
+      color: #111827;
+
+      text-decoration: none;
+
+      cursor: pointer;
+
+      font-size: .9rem;
+
+      transition:
+        transform .15s ease,
+        background .15s ease,
+        border-color .15s ease;
+    }
+
+
+    .btn:hover {
+      transform:
+        translateY(-1px);
+    }
+
+
+    .btn--primary {
+      background: #111827;
+
+      color: #fff;
+
+      border-color: #111827;
+    }
+
+
+    .btn--danger {
+      color: #b91c1c;
+
+      border-color: #fecaca;
+
+      background: #fff;
+    }
+
+
+    .btn--danger:hover {
+      background: #fee2e2;
+    }
+
+
+    .btn--new {
+      background: #e11d48;
+
+      color: #fff;
+
+      border-color: #e11d48;
+    }
+
+
+    /* =========================
+       TABLE WRAPPER
+    ========================= */
+
+    .table-wrapper {
+      width: 100%;
+
+      overflow-x: auto;
+    }
+
+
+    /* =========================
+       TABLE
+    ========================= */
+
+    table.inv {
+      width: 100%;
+
+      border-collapse: collapse;
+
+      min-width: 900px;
+    }
+
+
+    .inv th,
+    .inv td {
+      padding:
+        .7rem .75rem;
+
+      border-bottom:
+        1px solid #eef0f2;
+
+      vertical-align:
+        middle;
+
+      text-align:
+        left;
+    }
+
+
+    .inv thead th {
+      background: #f7f8fa;
+
+      font-size: .85rem;
+
+      color: #475569;
+    }
+
+
+    .inv tbody tr:hover {
+      background: #fafafa;
+    }
+
+
+    /* =========================
+       IMAGE
+    ========================= */
+
+    .thumb {
+      width: 68px;
+      height: 46px;
+
+      object-fit: cover;
+
+      border-radius: .45rem;
+
+      background: #f3f4f6;
+    }
+
+
+    .car-info {
+      display: flex;
+
+      align-items: center;
+
+      gap: .6rem;
+    }
+
+
+    .car-name {
+      font-weight: 600;
+    }
+
+
+    .car-id {
+      font-size: .75rem;
+
+      color: #64748b;
+    }
+
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    .pill {
+      display: inline-block;
+
+      padding:
+        .2rem .6rem;
+
+      border-radius:
+        999px;
+
+      font-size:
+        .75rem;
+
+      text-transform:
+        capitalize;
+    }
+
+
+    .pill-available {
+      background: #dcfce7;
+
+      color: #166534;
+    }
+
+
+    .pill-reserved {
+      background: #fef9c3;
+
+      color: #854d0e;
+    }
+
+
+    .pill-sold {
+      background: #fee2e2;
+
+      color: #991b1b;
+    }
+
+
+    .pill-secondary {
+      background: #e5e7eb;
+
+      color: #374151;
+    }
+
+
+    /* =========================
+       ACTIONS
+    ========================= */
+
+    .actions {
+      display: flex;
+
+      gap: .4rem;
+
+      flex-wrap: wrap;
+
+      align-items: center;
+    }
+
+
+    .actions form {
+      margin: 0;
+    }
+
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 900px) {
+
+      .admin-layout {
+        flex-direction:
+          column;
       }
-      #adminSidebarToggle{
-        display:inline-block; background:none; border:1px solid rgba(255,255,255,.3);
-        color:#fff; border-radius:.4rem; padding:.25rem .5rem; font-size:.9rem;
+
+
+      #adminSidebar {
+        width: 100%;
+
+        min-width: 0;
+
+        flex-direction:
+          row;
+
+        align-items:
+          center;
+
+        justify-content:
+          space-between;
+
+        position:
+          relative;
       }
-      #adminSidebarNav{
-        display:none; flex-direction:column; gap:.5rem; background:#0f172a; width:100%;
-        position:absolute; top:100%; left:0; padding:.6rem .75rem .75rem;
-        border-bottom-left-radius:.75rem; border-bottom-right-radius:.75rem;
-        box-shadow:0 10px 25px rgba(15,23,42,.25); z-index:999;
+
+
+      #adminSidebarToggle {
+        display:
+          inline-block;
+
+        background:
+          none;
+
+        border:
+          1px solid rgba(255, 255, 255, .3);
+
+        color:
+          #fff;
+
+        border-radius:
+          .4rem;
+
+        padding:
+          .25rem .5rem;
+
+        font-size:
+          .9rem;
+
+        cursor:
+          pointer;
       }
-      #adminSidebar.is-open #adminSidebarNav{ display:flex !important; }
+
+
+      #adminSidebarNav {
+        display:
+          none;
+
+        flex-direction:
+          column;
+
+        gap:
+          .5rem;
+
+        background:
+          #0f172a;
+
+        width:
+          100%;
+
+        position:
+          absolute;
+
+        top:
+          100%;
+
+        left:
+          0;
+
+        padding:
+          .6rem .75rem .75rem;
+
+        border-bottom-left-radius:
+          .75rem;
+
+        border-bottom-right-radius:
+          .75rem;
+
+        box-shadow:
+          0 10px 25px rgba(15, 23, 42, .25);
+
+        z-index:
+          999;
+      }
+
+
+      #adminSidebar.is-open #adminSidebarNav {
+        display:
+          flex !important;
+      }
+
+
+      .main {
+        padding:
+          1rem;
+      }
+
+
+      .wrap {
+        padding:
+          1rem;
+      }
+
+
+      .head {
+        align-items:
+          flex-start;
+
+        flex-direction:
+          column;
+      }
+
+
+      .search {
+        width:
+          100%;
+      }
+
+
+      .search input {
+        min-width:
+          0;
+
+        flex:
+          1 1 100%;
+      }
+
     }
+
   </style>
 </head>
+
+
 <body class="admin-layout">
-  <!-- Sidebar -->
+
+
+  <!-- =========================
+       SIDEBAR
+  ========================== -->
+
   <aside id="adminSidebar">
+
     <div class="admin-sidebar__brand">
-      <span class="admin-sidebar__icon">🚗</span>
-      <span class="admin-sidebar__title">Auto Dealer</span>
+
+      <span class="admin-sidebar__icon">
+        🚗
+      </span>
+
+      <span class="admin-sidebar__title">
+        Auto Dealer
+      </span>
+
     </div>
-    <button id="adminSidebarToggle" type="button">☰</button>
+
+
+    <button
+      id="adminSidebarToggle"
+      type="button"
+      aria-label="Abrir menú"
+    >
+      ☰
+    </button>
+
+
     <nav id="adminSidebarNav">
-      <a href="/admin/dashboard" class="admin-sidebar__link">Dashboard</a>
-      <a href="/autos" class="admin-sidebar__link admin-sidebar__link--active">Inventario</a>
-      <a href="/admin/ventas" class="admin-sidebar__link">Ventas / Reservas</a>
-      <a href="/admin/autos/nuevo" class="admin-sidebar__link">Publicar auto</a>
-      <a href="/" class="admin-sidebar__link" target="_blank">Ver sitio</a>
+
+      <a
+        href="/admin/dashboard"
+        class="admin-sidebar__link"
+      >
+        Dashboard
+      </a>
+
+
+      <a
+        href="/autos"
+        class="admin-sidebar__link admin-sidebar__link--active"
+      >
+        Inventario
+      </a>
+
+
+      <a
+        href="/admin/ventas"
+        class="admin-sidebar__link"
+      >
+        Ventas / Reservas
+      </a>
+
+
+      <a
+        href="/admin/autos/nuevo"
+        class="admin-sidebar__link"
+      >
+        Publicar auto
+      </a>
+
+
+      <a
+        href="/"
+        class="admin-sidebar__link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Ver sitio
+      </a>
+
     </nav>
+
   </aside>
 
-  <!-- Contenido -->
+
+
+  <!-- =========================
+       MAIN
+  ========================== -->
+
   <main class="main">
+
     <div class="wrap">
+
+
+      <!-- =========================
+           HEADER
+      ========================== -->
+
       <div class="head">
-        <h2 style="margin:0;">Inventario</h2>
-        <form class="search" method="GET" action="/autos">
-          <input type="text" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="Buscar por marca, modelo o tipo..." />
-          <button type="submit" class="btn btn--primary">Buscar</button>
-          <a href="/admin/autos/nuevo" class="btn btn--primary" style="background:#e11d48;border-color:#e11d48;">+ Nuevo</a>
+
+        <h2>
+          Inventario
+        </h2>
+
+
+        <form
+          class="search"
+          method="GET"
+          action="/autos"
+        >
+
+          <input
+            type="text"
+            name="q"
+            value="<%= typeof q !== 'undefined' ? q : '' %>"
+            placeholder="Buscar por marca, modelo o tipo..."
+          >
+
+
+          <button
+            type="submit"
+            class="btn btn--primary"
+          >
+            Buscar
+          </button>
+
+
+          <% if (q && q.trim() !== "") { %>
+
+            <a
+              href="/autos"
+              class="btn"
+            >
+              Limpiar
+            </a>
+
+          <% } %>
+
+
+          <a
+            href="/admin/autos/nuevo"
+            class="btn btn--new"
+          >
+            + Nuevo
+          </a>
+
         </form>
+
       </div>
 
-      <table class="inv">
-        <thead>
-          <tr>
-            <th>Auto</th>
-            <th>Año</th>
-            <th>Precio/día</th>
-            <th>Estatus</th>
-            <th># Reservas</th>
-            <th>Alta</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-        <%
-          function fechaBonita(d){
-            if(!d) return "";
-            let iso;
-            if (d.toISOString) { iso = d.toISOString().slice(0,10); }
-            else { iso = new Date(d).toISOString().slice(0,10); }
-            const [y,m,day] = iso.split("-");
-            const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-            return Number(day) + " de " + meses[Number(m)-1] + " de " + y;
-          }
-        %>
 
-        <% if (!cars || cars.length === 0) { %>
-          <tr><td colspan="7" style="text-align:center; padding:1rem;">Sin resultados</td></tr>
-        <% } else { %>
-          <% cars.forEach(c => {
-            const s = (c.status || 'available').toLowerCase();
-            const pill =
-              s === 'sold' ? 'pill-sold' :
-              s === 'reserved' ? 'pill-reserved' :
-              (s === 'publicado' || s === 'available') ? 'pill-available' : 'pill-secondary';
-          %>
+
+      <!-- =========================
+           HELPER FECHA
+      ========================== -->
+
+      <%
+        function fechaBonita(d) {
+
+          if (!d) {
+            return "";
+          }
+
+          let iso;
+
+          if (d.toISOString) {
+
+            iso =
+              d.toISOString()
+                .slice(0, 10);
+
+          } else {
+
+            iso =
+              new Date(d)
+                .toISOString()
+                .slice(0, 10);
+          }
+
+
+          const [
+            y,
+            m,
+            day
+          ] = iso.split("-");
+
+
+          const meses = [
+            "enero",
+            "febrero",
+            "marzo",
+            "abril",
+            "mayo",
+            "junio",
+            "julio",
+            "agosto",
+            "septiembre",
+            "octubre",
+            "noviembre",
+            "diciembre"
+          ];
+
+
+          return (
+            Number(day)
+            + " de "
+            + meses[Number(m) - 1]
+            + " de "
+            + y
+          );
+        }
+      %>
+
+
+
+      <!-- =========================
+           INVENTARIO
+      ========================== -->
+
+      <div class="table-wrapper">
+
+        <table class="inv">
+
+          <thead>
+
             <tr>
-              <td style="display:flex;align-items:center;gap:.6rem;">
-                <img class="thumb" src="<%= c.image_url && c.image_url !== '' ? c.image_url : '/Assets/Imgs/placeholder-car.jpg' %>" alt="">
-                <div>
-                  <div style="font-weight:600;"><%= c.brand %> <%= c.model %></div>
-                  <div style="font-size:.75rem; color:#64748b;">ID #<%= c.id %></div>
-                </div>
-              </td>
-              <td><%= c.year %></td>
-              <td>$<%= Number(c.price_per_day || 0).toLocaleString('es-MX') %></td>
-              <td><span class="pill <%= pill %>"><%= s %></span></td>
-              <td><%= c.reservas_total %></td>
-              <td><%= fechaBonita(c.created_at) %></td>
-              <td class="actions" style="display:flex;gap:.4rem;flex-wrap:wrap;">
-                <a href="/admin/autos/<%= c.id %>/editar" class="btn" style="border:1px solid #e5e7eb;padding:.25rem .6rem;border-radius:.45rem;text-decoration:none;color:#111827;background:#fff;">Editar</a>
-                <a href="/admin/ventas?car_id=<%= c.id %>" class="btn" style="border:1px solid #e5e7eb;padding:.25rem .6rem;border-radius:.45rem;text-decoration:none;color:#111827;background:#fff;">Reservas</a>
-              </td>
+
+              <th>
+                Auto
+              </th>
+
+              <th>
+                Año
+              </th>
+
+              <th>
+                Precio/día
+              </th>
+
+              <th>
+                Estatus
+              </th>
+
+              <th>
+                # Reservas
+              </th>
+
+              <th>
+                Alta
+              </th>
+
+              <th>
+                Acciones
+              </th>
+
             </tr>
-          <% }) %>
-        <% } %>
-        </tbody>
-      </table>
+
+          </thead>
+
+
+          <tbody>
+
+
+            <% if (!cars || cars.length === 0) { %>
+
+              <tr>
+
+                <td
+                  colspan="7"
+                  style="
+                    text-align:center;
+                    padding:1.5rem;
+                    color:#64748b;
+                  "
+                >
+
+                  <% if (q && q.trim() !== "") { %>
+
+                    No se encontraron autos para
+                    "<%= q %>".
+
+                  <% } else { %>
+
+                    No hay autos registrados.
+
+                  <% } %>
+
+                </td>
+
+              </tr>
+
+
+            <% } else { %>
+
+
+              <% cars.forEach(c => { %>
+
+
+                <%
+                  const s =
+                    (
+                      c.status
+                      || "available"
+                    )
+                    .toLowerCase();
+
+
+                  const pill =
+
+                    s === "sold"
+
+                      ? "pill-sold"
+
+                    : s === "reserved"
+
+                      ? "pill-reserved"
+
+                    : (
+                        s === "publicado"
+                        || s === "available"
+                      )
+
+                      ? "pill-available"
+
+                    : "pill-secondary";
+                %>
+
+
+                <tr>
+
+
+                  <!-- AUTO -->
+
+                  <td>
+
+                    <div class="car-info">
+
+                      <img
+                        class="thumb"
+
+                        src="<%=
+                          c.image_url
+                          && c.image_url !== ''
+
+                          ? c.image_url
+
+                          : '/Assets/Imgs/placeholder-car.jpg'
+                        %>"
+
+                        alt="<%= c.brand %> <%= c.model %>"
+                      >
+
+
+                      <div>
+
+                        <div class="car-name">
+
+                          <%= c.brand %>
+                          <%= c.model %>
+
+                        </div>
+
+
+                        <div class="car-id">
+
+                          ID #<%= c.id %>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+
+                  <!-- AÑO -->
+
+                  <td>
+
+                    <%= c.year %>
+
+                  </td>
+
+
+
+                  <!-- PRECIO -->
+
+                  <td>
+
+                    $<%=
+                      Number(
+                        c.price_per_day || 0
+                      )
+                      .toLocaleString(
+                        "es-MX"
+                      )
+                    %>
+
+                  </td>
+
+
+
+                  <!-- STATUS -->
+
+                  <td>
+
+                    <span
+                      class="pill <%= pill %>"
+                    >
+
+                      <%= s %>
+
+                    </span>
+
+                  </td>
+
+
+
+                  <!-- RESERVAS -->
+
+                  <td>
+
+                    <%= c.reservas_total || 0 %>
+
+                  </td>
+
+
+
+                  <!-- FECHA ALTA -->
+
+                  <td>
+
+                    <%= fechaBonita(c.created_at) %>
+
+                  </td>
+
+
+
+                  <!-- ACCIONES -->
+
+                  <td>
+
+                    <div class="actions">
+
+
+                      <!-- EDITAR -->
+
+                      <a
+                        href="/admin/autos/<%= c.id %>/editar"
+                        class="btn"
+                      >
+
+                        Editar
+
+                      </a>
+
+
+
+                      <!-- ELIMINAR -->
+
+                      <form
+                        action="/admin/autos/<%= c.id %>/eliminar"
+                        method="POST"
+
+                        onsubmit="
+                          return confirm(
+                            '¿Seguro que quieres eliminar <%= c.brand %> <%= c.model %>? Esta acción no se puede deshacer.'
+                          );
+                        "
+                      >
+
+                        <button
+                          type="submit"
+                          class="btn btn--danger"
+                        >
+
+                          Eliminar
+
+                        </button>
+
+                      </form>
+
+
+
+                      <!-- RESERVAS -->
+
+                      <a
+                        href="/admin/ventas?car_id=<%= c.id %>"
+                        class="btn"
+                      >
+
+                        Reservas
+
+                      </a>
+
+
+                    </div>
+
+                  </td>
+
+
+                </tr>
+
+
+              <% }) %>
+
+
+            <% } %>
+
+
+          </tbody>
+
+        </table>
+
+      </div>
+
     </div>
+
   </main>
 
+
+
+  <!-- =========================
+       SIDEBAR MOBILE
+  ========================== -->
+
   <script>
-    // toggle sidebar
-    const adminBtn = document.getElementById('adminSidebarToggle');
-    const adminSidebar = document.getElementById('adminSidebar');
-    if (adminBtn && adminSidebar){
-      adminBtn.addEventListener('click', ()=> adminSidebar.classList.toggle('is-open'));
+
+    const adminBtn =
+      document.getElementById(
+        "adminSidebarToggle"
+      );
+
+
+    const adminSidebar =
+      document.getElementById(
+        "adminSidebar"
+      );
+
+
+    if (
+      adminBtn
+      && adminSidebar
+    ) {
+
+      adminBtn.addEventListener(
+        "click",
+        () => {
+
+          adminSidebar.classList.toggle(
+            "is-open"
+          );
+
+        }
+      );
     }
+
   </script>
+
+
 </body>
+
 </html>

@@ -8,21 +8,19 @@ import supabase from "../supabase.js";
 
 const router = Router();
 
-const BUCKET =
-  process.env.CAR_IMAGES_BUCKET || "car-images";
+const BUCKET = process.env.CAR_IMAGES_BUCKET || "car-images";
 
 
 /* =====================================================
-   MIDDLEWARE ADMIN
+   ADMIN
 ===================================================== */
 
 function ensureAdmin(req, res, next) {
   if (
-    !req.session ||
-    !req.session.user ||
+    !req.session?.user ||
     req.session.user.role !== "admin"
   ) {
-    return res.status(403).send("No tienes permiso");
+    return res.status(403).send("No tienes permiso.");
   }
 
   next();
@@ -30,26 +28,24 @@ function ensureAdmin(req, res, next) {
 
 
 /* =====================================================
-   MULTER
-   Las imágenes ya NO se guardan en public/uploads.
-   Se mantienen temporalmente en memoria.
+   IMÁGENES
 ===================================================== */
-
-const allowedMimeTypes = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-];
 
 const upload = multer({
   storage: multer.memoryStorage(),
 
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB
+    fileSize: 5 * 1024 * 1024,
   },
 
   fileFilter: (_req, file, cb) => {
-    if (!allowedMimeTypes.includes(file.mimetype)) {
+    const allowed = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowed.includes(file.mimetype)) {
       return cb(
         new Error(
           "Solo se permiten imágenes JPG, PNG o WEBP."
@@ -62,14 +58,8 @@ const upload = multer({
 });
 
 
-/* =====================================================
-   SUBIR IMAGEN A SUPABASE STORAGE
-===================================================== */
-
 async function uploadCarImage(file) {
-  if (!file) {
-    return null;
-  }
+  if (!file) return null;
 
   const extensions = {
     "image/jpeg": "jpg",
@@ -80,11 +70,8 @@ async function uploadCarImage(file) {
   const extension =
     extensions[file.mimetype] || "jpg";
 
-  const fileName =
-    `${Date.now()}-${randomUUID()}.${extension}`;
-
   const filePath =
-    `cars/${fileName}`;
+    `cars/${Date.now()}-${randomUUID()}.${extension}`;
 
   const { error } = await supabase.storage
     .from(BUCKET)
@@ -100,34 +87,69 @@ async function uploadCarImage(file) {
 
   if (error) {
     console.error(
-      "Error subiendo imagen a Supabase:",
+      "Error subiendo imagen:",
       error
     );
 
-    throw new Error(
-      "No se pudo subir la imagen."
-    );
+    throw error;
   }
 
   const { data } = supabase.storage
     .from(BUCKET)
     .getPublicUrl(filePath);
 
-  if (!data?.publicUrl) {
-    throw new Error(
-      "No se pudo obtener la URL de la imagen."
-    );
+  return data.publicUrl;
+}
+
+
+async function deleteCarImage(imageUrl) {
+  if (!imageUrl) return;
+
+  const marker =
+    `/storage/v1/object/public/${BUCKET}/`;
+
+  const index =
+    imageUrl.indexOf(marker);
+
+  // La imagen no pertenece a nuestro bucket.
+  if (index === -1) {
+    return;
   }
 
-  return data.publicUrl;
+  try {
+    const filePath =
+      decodeURIComponent(
+        imageUrl.substring(
+          index + marker.length
+        )
+      );
+
+    const { error } =
+      await supabase.storage
+        .from(BUCKET)
+        .remove([filePath]);
+
+    if (error) {
+      console.error(
+        "Error eliminando imagen:",
+        error
+      );
+    }
+
+  } catch (err) {
+    console.error(
+      "Error procesando imagen:",
+      err
+    );
+  }
 }
 
 
 /* =====================================================
    INVENTARIO
+   GET /autos
 ===================================================== */
 
-// /autos
 router.get(
   "/autos",
   ensureAdmin,
@@ -142,21 +164,15 @@ router.get(
         c.model,
         c.year,
         c.price_per_day,
-
-        COALESCE(
-          c.image_url,
-          ''
-        ) AS image_url,
-
-        COALESCE(
-          c.status,
-          'available'
-        ) AS status,
-
+        COALESCE(c.image_url, '') AS image_url,
+        COALESCE(c.status, 'available') AS status,
+        c.body_type,
+        c.seats,
+        c.description,
         c.created_at,
 
         (
-          SELECT COUNT(*)
+          SELECT COUNT(*)::int
           FROM reservations r
           WHERE r.car_id = c.id
         ) AS reservas_total
@@ -169,17 +185,15 @@ router.get(
     const params = [];
 
 
-    // Búsqueda
     if (
       q &&
       q.trim() !== ""
     ) {
-
       sql += `
         AND (
           c.brand ILIKE ?
           OR c.model ILIKE ?
-          OR c.body_type ILIKE ?
+          OR COALESCE(c.body_type, '') ILIKE ?
         )
       `;
 
@@ -200,13 +214,11 @@ router.get(
 
 
     try {
-
       const [cars] =
         await pool.query(
           sql,
           params
         );
-
 
       return res.render(
         "admin/inventory",
@@ -217,9 +229,8 @@ router.get(
       );
 
     } catch (err) {
-
       console.error(
-        "GET /autos error:",
+        "GET /autos:",
         err
       );
 
@@ -234,34 +245,20 @@ router.get(
 
 
 /* =====================================================
-   RUTA ESPEJO /admin/autos
+   /admin/autos
 ===================================================== */
 
 router.get(
   "/admin/autos",
   ensureAdmin,
-  async (req, res) => {
-
-    req.url =
-      "/autos" +
-      (
-        req.url.includes("?")
-          ? req.url.slice(
-              req.url.indexOf("?")
-            )
-          : ""
-      );
-
-    return router.handle(
-      req,
-      res
-    );
+  (_req, res) => {
+    return res.redirect("/autos");
   }
 );
 
 
 /* =====================================================
-   NUEVO AUTO - GET
+   NUEVO AUTO
 ===================================================== */
 
 router.get(
@@ -280,21 +277,13 @@ router.get(
 );
 
 
-/* =====================================================
-   NUEVO AUTO - POST
-===================================================== */
-
 router.post(
   "/admin/autos/nuevo",
-
   ensureAdmin,
-
   upload.single("image"),
-
   async (req, res) => {
 
     try {
-
       const {
         brand,
         model,
@@ -306,48 +295,23 @@ router.post(
         description,
       } = req.body;
 
-
-      /* -------------------------
-         VALIDACIONES
-      ------------------------- */
-
       const errors = [];
 
-      if (
-        !brand ||
-        !brand.trim()
-      ) {
+
+      if (!brand?.trim()) {
         errors.push(
           "La marca es obligatoria."
         );
       }
 
-      if (
-        !model ||
-        !model.trim()
-      ) {
+      if (!model?.trim()) {
         errors.push(
           "El modelo es obligatorio."
         );
       }
 
-      if (!year) {
-        errors.push(
-          "El año es obligatorio."
-        );
-      }
 
-      if (!price_per_day) {
-        errors.push(
-          "El precio por día es obligatorio."
-        );
-      }
-
-
-      /* Año */
-
-      const y =
-        Number(year);
+      const y = Number(year);
 
       const currentYear =
         new Date().getFullYear();
@@ -358,12 +322,10 @@ router.post(
         y > currentYear + 1
       ) {
         errors.push(
-          `El año debe estar entre 1980 y ${currentYear + 1}.`
+          "Año inválido."
         );
       }
 
-
-      /* Precio */
 
       const price =
         Number(price_per_day);
@@ -373,107 +335,63 @@ router.post(
         price <= 0
       ) {
         errors.push(
-          "El precio debe ser un número mayor a 0."
+          "Precio inválido."
         );
       }
 
 
-      /* Asientos */
-
       let seatsVal = null;
 
-      if (
-        seats &&
-        seats !== ""
-      ) {
-
-        const s =
-          Number(seats);
+      if (seats) {
+        const s = Number(seats);
 
         if (
-          Number.isNaN(s) ||
           !Number.isInteger(s) ||
           s <= 0
         ) {
-
           errors.push(
-            "Los asientos deben ser un número entero positivo."
+            "Número de asientos inválido."
           );
-
         } else {
-
           seatsVal = s;
         }
       }
 
 
-      /* -------------------------
-         SI HAY ERRORES
-      ------------------------- */
-
-      if (
-        errors.length > 0
-      ) {
-
+      if (errors.length > 0) {
         return res
           .status(400)
           .render(
             "admin/new-car",
             {
-              error:
-                errors.join(" "),
+              error: errors.join(" "),
 
-              preset: {
-                brand,
-                model,
-                year,
-                price_per_day,
-                body_type,
-                seats:
-                  seatsVal,
-                image_url,
-                description,
-              },
+              preset: req.body,
             }
           );
       }
 
 
-      /* -------------------------
-         IMAGEN
-      ------------------------- */
-
       let finalImage = null;
 
-      // Si se subió un archivo
-      if (req.file) {
 
+      if (req.file) {
         finalImage =
           await uploadCarImage(
             req.file
           );
 
-      }
-
-      // Si escribieron URL manual
-      else if (
-        image_url &&
-        image_url.trim()
+      } else if (
+        image_url?.trim()
       ) {
-
         finalImage =
           image_url.trim();
       }
 
 
-      /* -------------------------
-         INSERTAR AUTO
-      ------------------------- */
-
       await pool.query(
         `
-        INSERT INTO cars
-        (
+        INSERT INTO cars (
           brand,
           model,
           year,
@@ -486,17 +404,10 @@ router.post(
           created_at
         )
 
-        VALUES
-        (
-          ?,
-          ?,
-          ?,
-          ?,
+        VALUES (
+          ?, ?, ?, ?,
           'available',
-          ?,
-          ?,
-          ?,
-          ?,
+          ?, ?, ?, ?,
           NOW()
         )
         `,
@@ -518,9 +429,8 @@ router.post(
       );
 
     } catch (err) {
-
       console.error(
-        "POST /admin/autos/nuevo error:",
+        "Crear auto:",
         err
       );
 
@@ -530,7 +440,7 @@ router.post(
           "admin/new-car",
           {
             error:
-              "Ocurrió un error al guardar el auto.",
+              "No se pudo guardar el auto.",
 
             preset:
               req.body || null,
@@ -542,55 +452,27 @@ router.post(
 
 
 /* =====================================================
-   EDITAR AUTO - GET
+   EDITAR AUTO
 ===================================================== */
 
 router.get(
   "/admin/autos/:id/editar",
-
   ensureAdmin,
-
   async (req, res) => {
 
-    const { id } =
-      req.params;
-
     try {
-
       const [[car]] =
         await pool.query(
           `
-          SELECT
-            c.id,
-            c.brand,
-            c.model,
-            c.year,
-            c.price_per_day,
-
-            COALESCE(
-              c.image_url,
-              ''
-            ) AS image_url,
-
-            COALESCE(
-              c.status,
-              'available'
-            ) AS status,
-
-            c.body_type,
-            c.seats,
-            c.description
-
-          FROM cars c
-
-          WHERE c.id = ?
+          SELECT *
+          FROM cars
+          WHERE id = ?
           `,
-          [id]
+          [req.params.id]
         );
 
 
       if (!car) {
-
         return res
           .status(404)
           .send(
@@ -608,40 +490,50 @@ router.get(
       );
 
     } catch (err) {
-
       console.error(
-        "GET /admin/autos/:id/editar error:",
+        "Editar auto GET:",
         err
       );
 
       return res
         .status(500)
         .send(
-          "Error cargando el auto."
+          "Error cargando auto."
         );
     }
   }
 );
 
 
-/* =====================================================
-   EDITAR AUTO - POST
-===================================================== */
-
 router.post(
   "/admin/autos/:id/editar",
-
   ensureAdmin,
-
   upload.single("image"),
-
   async (req, res) => {
 
     const { id } =
       req.params;
 
-
     try {
+      const [[currentCar]] =
+        await pool.query(
+          `
+          SELECT *
+          FROM cars
+          WHERE id = ?
+          `,
+          [id]
+        );
+
+
+      if (!currentCar) {
+        return res
+          .status(404)
+          .send(
+            "Auto no encontrado."
+          );
+      }
+
 
       const {
         brand,
@@ -656,251 +548,62 @@ router.post(
       } = req.body;
 
 
-      /* -------------------------
-         VALIDACIONES
-      ------------------------- */
-
-      const errors = [];
-
-
-      if (
-        !brand ||
-        !brand.trim()
-      ) {
-        errors.push(
-          "La marca es obligatoria."
-        );
-      }
-
-
-      if (
-        !model ||
-        !model.trim()
-      ) {
-        errors.push(
-          "El modelo es obligatorio."
-        );
-      }
-
-
-      if (!year) {
-
-        errors.push(
-          "El año es obligatorio."
-        );
-      }
-
-
-      if (!price_per_day) {
-
-        errors.push(
-          "El precio por día es obligatorio."
-        );
-      }
-
-
-      /* Año */
-
       const y =
         Number(year);
-
-      const currentYear =
-        new Date().getFullYear();
-
-      if (
-        Number.isNaN(y) ||
-        y < 1980 ||
-        y > currentYear + 1
-      ) {
-
-        errors.push(
-          `El año debe estar entre 1980 y ${currentYear + 1}.`
-        );
-      }
-
-
-      /* Precio */
 
       const price =
         Number(price_per_day);
 
-      if (
-        Number.isNaN(price) ||
-        price <= 0
-      ) {
-
-        errors.push(
-          "El precio debe ser un número mayor a 0."
-        );
-      }
+      const seatsVal =
+        seats
+          ? Number(seats)
+          : null;
 
 
-      /* Asientos */
-
-      let seatsVal = null;
-
-      if (
-        seats &&
-        seats !== ""
-      ) {
-
-        const s =
-          Number(seats);
-
-        if (
-          Number.isNaN(s) ||
-          !Number.isInteger(s) ||
-          s <= 0
-        ) {
-
-          errors.push(
-            "Los asientos deben ser un número entero positivo."
-          );
-
-        } else {
-
-          seatsVal = s;
-        }
-      }
+      let finalImage =
+        currentCar.image_url;
 
 
-      /* -------------------------
-         SI HAY ERRORES
-      ------------------------- */
+      /* Nueva imagen subida */
 
-      if (
-        errors.length > 0
-      ) {
-
-        const [[car]] =
-          await pool.query(
-            `
-            SELECT *
-            FROM cars
-            WHERE id = ?
-            `,
-            [id]
-          );
-
-
-        if (!car) {
-
-          return res
-            .status(404)
-            .send(
-              "Auto no encontrado."
-            );
-        }
-
-
-        return res
-          .status(400)
-          .render(
-            "admin/car_edit",
-            {
-              car: {
-                ...car,
-
-                // Mostramos lo escrito por el usuario
-                brand,
-                model,
-                year,
-                price_per_day,
-                body_type,
-                seats:
-                  seatsVal,
-                description,
-                status,
-
-                image_url:
-                  image_url ||
-                  car.image_url ||
-                  "",
-              },
-
-              error:
-                errors.join(" "),
-            }
-          );
-      }
-
-
-      /* -------------------------
-         IMAGEN
-      ------------------------- */
-
-      let finalImage = null;
-
-
-      // Nueva imagen subida
       if (req.file) {
 
-        finalImage =
+        const newImage =
           await uploadCarImage(
             req.file
           );
 
-      }
 
-      // URL escrita manualmente
-      else if (
-        typeof image_url === "string"
-      ) {
+        await deleteCarImage(
+          currentCar.image_url
+        );
+
 
         finalImage =
-          image_url.trim() ||
-          null;
-      }
+          newImage;
 
-
-      /* -------------------------
-         CAMPOS UPDATE
-      ------------------------- */
-
-      const fields = [
-        brand.trim(),
-        model.trim(),
-        y,
-        price,
-        body_type || null,
-        seatsVal,
-        description || null,
-        status || "available",
-      ];
-
-
-      let setImageSQL = "";
-
-
-      /*
-        Solo actualizamos image_url si recibimos
-        una imagen nueva o una URL desde el formulario.
-
-        Si no llega nada, conservamos la que ya
-        estaba guardada.
-      */
-
-      if (
-        finalImage !== null
+      } else if (
+        image_url?.trim()
       ) {
 
-        setImageSQL =
-          `,
-          image_url = ?
-          `;
+        const newUrl =
+          image_url.trim();
 
-        fields.push(
-          finalImage
-        );
+
+        if (
+          newUrl !==
+          currentCar.image_url
+        ) {
+          await deleteCarImage(
+            currentCar.image_url
+          );
+        }
+
+
+        finalImage =
+          newUrl;
       }
 
-
-      fields.push(id);
-
-
-      /* -------------------------
-         UPDATE
-      ------------------------- */
 
       await pool.query(
         `
@@ -914,12 +617,23 @@ router.post(
           body_type = ?,
           seats = ?,
           description = ?,
-          status = ?
-          ${setImageSQL}
+          status = ?,
+          image_url = ?
 
         WHERE id = ?
         `,
-        fields
+        [
+          brand.trim(),
+          model.trim(),
+          y,
+          price,
+          body_type || null,
+          seatsVal,
+          description || null,
+          status || "available",
+          finalImage,
+          id,
+        ]
       );
 
 
@@ -928,9 +642,8 @@ router.post(
       );
 
     } catch (err) {
-
       console.error(
-        "POST /admin/autos/:id/editar error:",
+        "Editar auto POST:",
         err
       );
 
@@ -945,32 +658,159 @@ router.post(
 
 
 /* =====================================================
-   RUTAS LEGACY
+   ELIMINAR AUTO
+
+   ESTA ES LA RUTA QUE TE FALTABA
 ===================================================== */
 
-router.get(
-  "/autos/:id/editar",
-
+router.post(
+  "/admin/autos/:id/eliminar",
   ensureAdmin,
+  async (req, res) => {
 
+    const { id } =
+      req.params;
+
+    try {
+
+      /* Buscar el auto */
+
+      const [[car]] =
+        await pool.query(
+          `
+          SELECT
+            id,
+            brand,
+            model,
+            image_url
+
+          FROM cars
+
+          WHERE id = ?
+          `,
+          [id]
+        );
+
+
+      if (!car) {
+        return res
+          .status(404)
+          .send(
+            "Auto no encontrado."
+          );
+      }
+
+
+      /* Revisar reservaciones */
+
+      const [[reservationData]] =
+        await pool.query(
+          `
+          SELECT
+            COUNT(*)::int AS total
+
+          FROM reservations
+
+          WHERE car_id = ?
+          `,
+          [id]
+        );
+
+
+      /*
+       * No borramos autos que tengan historial
+       * de reservaciones para no romper datos.
+       */
+
+      if (
+        Number(
+          reservationData.total
+        ) > 0
+      ) {
+
+        return res
+          .status(400)
+          .send(
+            `No se puede eliminar ${car.brand} ${car.model} porque tiene reservaciones registradas.`
+          );
+      }
+
+
+      /* Eliminar auto */
+
+      await pool.query(
+        `
+        DELETE FROM cars
+        WHERE id = ?
+        `,
+        [id]
+      );
+
+
+      /* Eliminar foto de Supabase */
+
+      await deleteCarImage(
+        car.image_url
+      );
+
+
+      console.log(
+        `Auto eliminado: ${car.brand} ${car.model}`
+      );
+
+
+      return res.redirect(
+        "/autos"
+      );
+
+    } catch (err) {
+
+      console.error(
+        "ELIMINAR AUTO:",
+        err
+      );
+
+
+      return res
+        .status(500)
+        .send(
+          "No se pudo eliminar el auto."
+        );
+    }
+  }
+);
+
+
+/* =====================================================
+   ALIAS POR SEGURIDAD
+
+   También acepta:
+   POST /autos/:id/eliminar
+===================================================== */
+
+router.post(
+  "/autos/:id/eliminar",
+  ensureAdmin,
   (req, res) => {
 
     return res.redirect(
-      `/admin/autos/${req.params.id}/editar`
+      307,
+      `/admin/autos/${req.params.id}/eliminar`
     );
   }
 );
 
 
-router.post(
+/* =====================================================
+   RUTAS LEGACY DE EDITAR
+===================================================== */
+
+router.get(
   "/autos/:id/editar",
-
   ensureAdmin,
-
   (req, res) => {
 
     return res.redirect(
-      307,
       `/admin/autos/${req.params.id}/editar`
     );
   }
